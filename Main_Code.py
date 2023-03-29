@@ -9,7 +9,13 @@ of simulations.
 
 # Initialising all the classes and functions for the simulation to run
 # Initialise the world with necessary size and layers.
-world = World(r_length=30, c_length=30, layer_labels=['Agent', 'Food', 'Home'])
+# It is not recommended that the number of layers be more than 10 as it will cause errors within the visualisation.
+# The simulation will however work fine. just that the option for selecting layers will be disabled
+
+layers = {'Agent': ['Block', '#619130', 'None'], 'Pheromone': ['Float', '#bd7c22', 'None'],
+          'Home': ['Block', '#2227bd', 'None']}
+
+world = World(layer_data=layers, r_length=30, c_length=30)
 
 # Initialise the clock.
 clock = Clock()
@@ -22,13 +28,11 @@ def one_loop_step():
     Basically this function is the entire set of changes that are to happen to the world.
     :return:
     """
-
     # for random data for trial.
     if np.random.randint(60) == 1:
         # 1 in 60 probability to make a change
         layer = world.layers['Agent']
         layer[np.random.randint(30), np.random.randint(30)] = 1
-
     return
 
 
@@ -37,7 +41,6 @@ realise = Realise(world=world, loop_step=one_loop_step, clock=clock)
 
 # Now that all the classes have been initialised.
 realise.loop()
-
 
 # old code that might come in handy
 # for c, layer in enumerate(w.layers):
