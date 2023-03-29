@@ -14,7 +14,7 @@ class Clock:
     the world so that each can be manipulated separately if necessary.
     """
 
-    def __int__(self):
+    def __init__(self):
         self.time_step = 0
 
     def next_step(self):
@@ -46,13 +46,17 @@ class World:
 
 
 class Realise:
-    def __int__(self, world, loop_step):
+    """
+    This is the class used to visualise the environment/simulation.
+    """
+
+    def __init__(self, world: World, loop_step, clock: Clock, screen_size=(1000, 750)):
         self.world = world
         self.loop_step = loop_step
-        self.width = 1300
-        self.height = 1000
+        self.screen_size = screen_size
         pygame.init()
-        self.screen = pygame.display.set_mode((self.width, self.height))
+        self.screen = pygame.display.set_mode(self.screen_size)
+        self.clock = clock
 
     def draw(self):
         # This function draws the layers of the world on to the screen
@@ -72,8 +76,8 @@ class Realise:
             # This is defined by the creator according to the needs of the simulation.
             self.loop_step()
 
-            # Running the draw loop to create all the necessory layouts and surfaces
+            # Running the draw loop to create all the necessary layouts and surfaces
             self.draw()
 
             # updating the clock as one step is completed.
-            self.clock
+            self.clock.next_step()
