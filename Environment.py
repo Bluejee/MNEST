@@ -74,6 +74,7 @@ class Realise:
                  clock_color=(56, 74, 12), menu_background=(0, 255, 0), sim_background=(0, 0, 255)):
 
         pygame.init()
+
         # Simulation Variables
         self.world = world
         self.loop_step = loop_step
@@ -97,16 +98,15 @@ class Realise:
 
         self.clock_color = clock_color
 
-        # This creates a dictionary with keys being layer names and the value containing a class which contains
-        # information on how to display and if to display the layer.
-        self.display_layers = {layer: DisplayLayers(layer_data=self.world.layer_data[layer]) for layer in
-                               self.world.layer_data}
-
         # Surface and Display Variables
         # Screen
         self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
         self.screen.fill(border_color)
 
+        # This creates a dictionary with keys being layer names and the value containing a class which contains
+        # information on how to display and if to display the layer.
+        self.display_layers = {layer: DisplayLayers(layer_data=self.world.layer_data[layer]) for layer in
+                               self.world.layer_data}
         # Menu
         self.menu_surf = pygame.Surface((self.menu_width, self.screen_height))
         self.menu_rect = self.menu_surf.get_rect(topright=(self.screen_width, 0))
@@ -256,20 +256,48 @@ class DisplayLayers:
         self.sprite_image = layer_data[2]
         if self.layer_type == 'Float':
             self.max_value = layer_data[3]
-
+        if self.sprite_image != 'None':
+            self.sprite_image = pygame.image.load(self.sprite_image).convert_alpha()
         self.active = 1
 
     def draw_cell(self, value, surface, location):
+        """
+        This function draws the cell with the element depending upon the type.
+        it also checks if a sprite image is to be drawn.
+
+        *This Assumes that the sprite images that are used have the same dimensions as the cell_size*
+
+        :param value: the value/transparency for the cell
+        :param surface: layer surface on which the cells are to be drawn
+        :param location: the position and size of the cell for the rect to be placed.
+        :return:
+        """
         if self.layer_type == 'Block':
             if value == 1:
-                # draw the block
-                pygame.draw.rect(surface, self.color, location)
+                if self.sprite_image == 'None':
+                    # If there is no sprite image to be shown.
+                    # Draw the block
+                    pygame.draw.rect(surface, self.color, location)
+                else:
+                    # Show the sprite at the cell
+                    sprite_rect = pygame.Rect(location)
+                    print(sprite_rect, self.sprite_image)
+                    surface.blit(self.sprite_image, sprite_rect)
 
         elif self.layer_type == 'Float':
-            # draw the Float
-            # setting transparency value
-            transparency = int((value / self.max_value) * 255)
-            pygame.draw.rect(surface, (*self.color, transparency), location)
+            if self.sprite_image == 'None':
+                # If there is no sprite image to be shown.
+                # Draw the Float
+                transparency = int((value / self.max_value) * 255)
+                pygame.draw.rect(surface, (*self.color, transparency), location)
+            else:
+                # Show the sprite at the cell
+                # Setting transparency value
+                transparency = int((value / self.max_value) * 255)
+                self.sprite_image.set_alpha(transparency)
+                sprite_rect = pygame.Rect(location)
+                surface.blit(self.sprite_image, sprite_rect)
+
 
         else:
             print("ERROR!!!")

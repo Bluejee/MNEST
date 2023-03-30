@@ -12,13 +12,13 @@ of simulations.
 # It is not recommended that the number of layers be more than 10 as it will cause errors within the visualisation.
 # The simulation will however work fine. just that the option for selecting layers will be disabled
 
-layers = {'Agent': ['Block', (255, 0, 0), 'None'], 'Pheromone': ['Float', (209, 126, 17), 'None', 100],
+layers = {'Agent': ['Block', (255, 0, 0), 'Images/ant_sq_20.png'], 'Pheromone': ['Float', (209, 126, 17), 'None', 100],
           'Home': ['Block', (214, 103, 191), 'None']}
 
 w = World(layer_data=layers, r_length=30, c_length=30)
 
 # Setting up the Agent and Home
-w.layers['Agent'] = [[3, 5], [7, 9], [22, 28]]
+w.layers['Agent'] = [[0, 0], [7, 9], [22, 28]]
 w.layers['Home'] = [[15, 15], [14, 14], [15, 14]]
 
 # Initialise the clock.
@@ -43,7 +43,7 @@ def one_loop_step(world):
 
 
 # Initialise the realisation/ Gods Perspective
-realise = Realise(world=w, loop_step=one_loop_step, clock=clock)
+realise = Realise(world=w, loop_step=one_loop_step, clock=clock, sim_background=(89, 187, 247))
 
 # Now that all the classes have been initialised.
 realise.loop()
