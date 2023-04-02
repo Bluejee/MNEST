@@ -42,7 +42,7 @@ class World:
 
     """
 
-    def __init__(self, layer_data: dict, r_length=30, c_length=30):
+    def __init__(self, layer_data: dict, r_length=30, c_length=30, periodic_boundary=False):
         """
 
         :param layer_data: data of the form
@@ -50,9 +50,11 @@ class World:
         In case of Float a max value to calculate %]}
         :param r_length: number of rows of the world.
         :param c_length: number of columns of the world.
+        :param periodic_boundary: weather or not the world has a periodic boundary.
         """
         self.r_length = r_length  # no of rows
         self.c_length = c_length  # no of columns
+        self.periodic_boundary = periodic_boundary
         self.layer_data = layer_data
         self.layers = {}
 
