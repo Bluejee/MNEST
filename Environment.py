@@ -70,7 +70,8 @@ class Realise:
     This is the class used to visualise the environment/simulation.
     """
 
-    def __init__(self, world: World, loop_step, clock: Clock, cell_size=20, border_size=2, border_color=(255, 0, 0),
+    def __init__(self, world: World, loop_step, loop_parameters, clock: Clock, cell_size=20, border_size=2,
+                 border_color=(255, 0, 0),
                  clock_color=(56, 74, 12), menu_background=(0, 255, 0), sim_background=(0, 0, 255)):
 
         pygame.init()
@@ -78,6 +79,7 @@ class Realise:
         # Simulation Variables
         self.world = world
         self.loop_step = loop_step
+        self.loop_parameters = loop_parameters
         self.clock = clock
         self.state = "Pause"  # The visualisation starts at the paused state.
 
@@ -230,7 +232,7 @@ class Realise:
 
                 # Running one step of the loop as provided in the definition.
                 # This is defined by the creator according to the needs of the simulation.
-                self.loop_step(self.world)
+                self.loop_step(self.loop_parameters)
 
                 # updating the clock as one step is completed.
                 self.clock.next_step()
@@ -281,7 +283,7 @@ class DisplayLayers:
                 else:
                     # Show the sprite at the cell
                     sprite_rect = pygame.Rect(location)
-                    print(sprite_rect, self.sprite_image)
+                    # print(sprite_rect, self.sprite_image)
                     surface.blit(self.sprite_image, sprite_rect)
 
         elif self.layer_type == 'Float':
@@ -289,15 +291,16 @@ class DisplayLayers:
                 # If there is no sprite image to be shown.
                 # Draw the Float
                 transparency = int((value / self.max_value) * 255)
+                transparency = np.random.randint(256)
                 pygame.draw.rect(surface, (*self.color, transparency), location)
             else:
                 # Show the sprite at the cell
                 # Setting transparency value
                 transparency = int((value / self.max_value) * 255)
+                transparency = np.random.randint(256)
                 self.sprite_image.set_alpha(transparency)
                 sprite_rect = pygame.Rect(location)
                 surface.blit(self.sprite_image, sprite_rect)
-
 
         else:
             print("ERROR!!!")
