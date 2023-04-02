@@ -84,6 +84,7 @@ class Realise:
         self.loop_parameters = loop_parameters
         self.clock = clock
         self.state = "Pause"  # The visualisation starts at the paused state.
+        self.frame_rate_cap = 60  # this is only for testing purposes and hence is not accepted as a parameter.
 
         # Visualisation Variables
         self.pyclock = pygame.time.Clock()
@@ -239,7 +240,7 @@ class Realise:
                 # updating the clock as one step is completed.
                 self.clock.next_step()
 
-            self.pyclock.tick(60)
+            self.pyclock.tick(self.frame_rate_cap)
 
 
 class DisplayLayers:
