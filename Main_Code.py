@@ -51,7 +51,8 @@ def one_loop_step(loop_parameters: list):
 
 
 # Initialise the realisation/ Gods Perspective
-realise = Realise(world=w, loop_step=one_loop_step, clock=clock, sim_background=(89, 187, 247))
+realise = Realise(world=w, loop_step=one_loop_step, loop_parameters=parameters,
+                  clock=clock, sim_background=(89, 187, 247))
 
 # Now that all the classes have been initialised.
 realise.loop()

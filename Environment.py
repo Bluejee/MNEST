@@ -291,13 +291,13 @@ class DisplayLayers:
                 # If there is no sprite image to be shown.
                 # Draw the Float
                 transparency = int((value / self.max_value) * 255)
-                transparency = np.random.randint(256)
+                # transparency = np.random.randint(256) For testing.
                 pygame.draw.rect(surface, (*self.color, transparency), location)
             else:
                 # Show the sprite at the cell
                 # Setting transparency value
                 transparency = int((value / self.max_value) * 255)
-                transparency = np.random.randint(256)
+                # transparency = np.random.randint(256) For testing.
                 self.sprite_image.set_alpha(transparency)
                 sprite_rect = pygame.Rect(location)
                 surface.blit(self.sprite_image, sprite_rect)
