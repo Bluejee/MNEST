@@ -1,12 +1,16 @@
+import numpy as np
+from scipy.signal import convolve2d
+
 from Laws import *
 
 
 class Agent:
-    def __init__(self, world, layer_name, position=Vector2(0, 0)):
+    def __init__(self, world, layer_name, position=Vector2(0, 0), direction=RIGHT):
         self.world = world
         self.layer_name = layer_name
         self.position = position
-        self.direction = RIGHT
+        self.direction = np.copy(direction)
+        # as Right is a list, it is inherited as a pointer and hence we have to make a copy to avoid problems.
 
         # Fun Fact.
         # As We are storing the position of the element inside the layer. and not a copy of the values.
@@ -59,21 +63,35 @@ class Agent:
 
 
 class Essence:
-    def __init__(self, world, layer_name, dispersion_rate=0, decay_rate=0):
+    def __init__(self, world, layer_name,
+                 dispersion_matrix=np.array([[0.01, 0.01, 0.01],
+                                             [0.01, 0.92, 0.01],
+                                             [0.01, 0.01, 0.01]]), decay_rate=0):
         self.world = world
         self.layer_name = layer_name
         self.max_value = self.world.layer_data[layer_name][3]
         self.decay_rate = decay_rate
-        self.dispersion_rate = dispersion_rate
+        self.dispersion_matrix = dispersion_matrix
+        print(self.dispersion_matrix, dispersion_matrix)
 
     def disperse(self):
-        # use matrices and convolutions to disperse
-        pass
+        """
+        Uses matrices and convolutions to disperse the essence
+        In general the rule of thumb is that the dispersion matrix con have values where the total of the values is 1.
+        Also, the sum of all values that is dispersed(Total - Center_Value) = 1 - Center_Value. of the matrix
+        # we need the original layer
+        :return:
+        """
+        print(type(self.world.layers[self.layer_name]))
+        print(self.dispersion_matrix)
+
+        self.world.layers[self.layer_name] = convolve2d(self.world.layers[self.layer_name], self.dispersion_matrix,
+                                                        mode='same')
 
     def decay(self):
-        # use matrices and convolutions to disperse
+        # This is usually not something that we need to use in simulations unless we have periodic boundaries or so.
+        # Usually, things disperse and then go out of the edge of the world.
         self.world.layers[self.layer_name] -= self.decay_rate
-
         # check if any value went below 0 and if so set it to 0.
         mask = self.world.layers[self.layer_name] < 0
         self.world.layers[self.layer_name][mask] = 0
