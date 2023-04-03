@@ -72,41 +72,40 @@ class Realise:
     This is the class used to visualise the environment/simulation.
     """
 
-    def __init__(self, world: World, loop_step, loop_parameters, clock: Clock, cell_size=20, border_size=2,
-                 border_color=(255, 0, 0),
-                 clock_color=(56, 74, 12), menu_background=(0, 255, 0), sim_background=(0, 0, 255)):
+    def __init__(self, world: World):
 
         pygame.init()
 
         # Simulation Variables
         self.world = world
-        self.loop_step = loop_step
-        self.loop_parameters = loop_parameters
-        self.clock = clock
+        self.clock = Clock()
         self.state = "Pause"  # The visualisation starts at the paused state.
         self.frame_rate_cap = 60  # this is only for testing purposes and hence is not accepted as a parameter.
 
         # Visualisation Variables
         self.pyclock = pygame.time.Clock()
-        self.cell_size = cell_size
+        self.cell_size = 20
 
-        self.border_size = border_size  # border goes around the simulation
-        self.border_color = border_color
+        self.border_size = 2  # border goes around the simulation
+        self.border_color = (255, 0, 0)
 
         self.sim_width = (self.cell_size * self.world.c_length)  # width = no of columns * cell_size
-        self.sim_height = (self.cell_size * self.world.r_length)  # height = no of rows * celbackgroundl_size
+        self.sim_height = (self.cell_size * self.world.r_length)  # height = no of rows * cell_size
 
         self.menu_width = int(self.sim_width / 3)
 
-        self.screen_height = self.sim_height + 2 * border_size
-        self.screen_width = self.sim_width + self.menu_width + 2 * border_size
+        self.screen_height = self.sim_height + 2 * self.border_size
+        self.screen_width = self.sim_width + self.menu_width + 2 * self.border_size
 
-        self.clock_color = clock_color
+        self.clock_color = (56, 74, 12)
+
+        self.menu_background = (0, 255, 0)
+        self.sim_background = (89, 187, 247)
 
         # Surface and Display Variables
         # Screen
         self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
-        self.screen.fill(border_color)
+        self.screen.fill(self.border_color)
 
         # This creates a dictionary with keys being layer names and the value containing a class which contains
         # information on how to display and if to display the layer.
@@ -115,12 +114,12 @@ class Realise:
         # Menu
         self.menu_surf = pygame.Surface((self.menu_width, self.screen_height))
         self.menu_rect = self.menu_surf.get_rect(topright=(self.screen_width, 0))
-        self.menu_surf.fill(menu_background)
+        self.menu_surf.fill(self.menu_background)
 
         # Simulation
         self.sim_surf = pygame.Surface((self.sim_width, self.sim_height))
         self.sim_rect = self.sim_surf.get_rect(topleft=(self.border_size, self.border_size))
-        self.sim_surf.fill(sim_background)
+        self.sim_surf.fill(self.sim_background)
 
         # Clock/Step text
         self.clock_font = pygame.font.Font(None, 25)
@@ -210,7 +209,7 @@ class Realise:
         else:
             self.state = "Play"
 
-    def loop(self):
+    def loop(self, loop_step):
         # Running the draw and update functions once to show initial state.
         # Running the draw loop to create all the necessary layouts and surfaces
         self.draw()
@@ -235,7 +234,7 @@ class Realise:
 
                 # Running one step of the loop as provided in the definition.
                 # This is defined by the creator according to the needs of the simulation.
-                self.loop_step(self.loop_parameters)
+                loop_step()
 
                 # updating the clock as one step is completed.
                 self.clock.next_step()
