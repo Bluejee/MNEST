@@ -72,7 +72,6 @@ class Essence:
         self.max_value = self.world.layer_data[layer_name][3]
         self.decay_rate = decay_rate
         self.dispersion_matrix = dispersion_matrix
-        print(self.dispersion_matrix, dispersion_matrix)
 
     def disperse(self):
         """
@@ -82,8 +81,6 @@ class Essence:
         # we need the original layer
         :return:
         """
-        print(type(self.world.layers[self.layer_name]))
-        print(self.dispersion_matrix)
 
         self.world.layers[self.layer_name] = convolve2d(self.world.layers[self.layer_name], self.dispersion_matrix,
                                                         mode='same')
