@@ -72,7 +72,7 @@ class Realise:
     This is the class used to visualise the environment/simulation.
     """
 
-    def __init__(self, world: World):
+    def __init__(self, world: World, frame_rate_cap=60, cell_size=20, border_size=2):
 
         pygame.init()
 
@@ -80,13 +80,13 @@ class Realise:
         self.world = world
         self.clock = Clock()
         self.state = "Pause"  # The visualisation starts at the paused state.
-        self.frame_rate_cap = 60  # this is only for testing purposes and hence is not accepted as a parameter.
+        self.frame_rate_cap = frame_rate_cap
 
         # Visualisation Variables
         self.pyclock = pygame.time.Clock()
-        self.cell_size = 20
+        self.cell_size = cell_size
 
-        self.border_size = 2  # border goes around the simulation
+        self.border_size = border_size  # border goes around the simulation
         self.border_color = (255, 0, 0)
 
         self.sim_width = (self.cell_size * self.world.c_length)  # width = no of columns * cell_size
