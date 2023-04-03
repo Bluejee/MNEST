@@ -72,7 +72,8 @@ class Realise:
     This is the class used to visualise the environment/simulation.
     """
 
-    def __init__(self, world: World, frame_rate_cap=60, cell_size=20, border_size=2):
+    def __init__(self, world: World, frame_rate_cap=60, cell_size=20, border_size=2, clock_color=(56, 74, 12),
+                 sim_background=(89, 187, 247), menu_background=(0, 255, 0), border_color=(255, 0, 0)):
 
         pygame.init()
 
@@ -87,7 +88,7 @@ class Realise:
         self.cell_size = cell_size
 
         self.border_size = border_size  # border goes around the simulation
-        self.border_color = (255, 0, 0)
+        self.border_color = border_color
 
         self.sim_width = (self.cell_size * self.world.c_length)  # width = no of columns * cell_size
         self.sim_height = (self.cell_size * self.world.r_length)  # height = no of rows * cell_size
@@ -97,10 +98,10 @@ class Realise:
         self.screen_height = self.sim_height + 2 * self.border_size
         self.screen_width = self.sim_width + self.menu_width + 2 * self.border_size
 
-        self.clock_color = (56, 74, 12)
+        self.clock_color = clock_color
 
-        self.menu_background = (0, 255, 0)
-        self.sim_background = (89, 187, 247)
+        self.menu_background = menu_background
+        self.sim_background = sim_background
 
         # Surface and Display Variables
         # Screen
