@@ -1,4 +1,4 @@
-from Environment import World, Clock, Realise
+from Environment import World, Realise
 from Entities import Agent, Essence
 from Laws import *
 import numpy as np
