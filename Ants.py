@@ -46,13 +46,16 @@ class Visualise(Realise):
 
         # Initialise the parent class.
         # Adjust set parameters
-        super().__init__(world=World(layer_data=layers, r_length=30, c_length=30), frame_rate_cap=20, cell_size=30)
-
+        # sim_background = (255, 255, 255)
+        super().__init__(world=World(layer_data=layers, r_length=30, c_length=30), frame_rate_cap=60, cell_size=20,
+                         sim_background=(255, 255, 255))
         # Set up the new variables and performing initial setups.
         self.ant_list = [Ant(self.world, 'Ants', Vector2(i % 30, i % 30)) for i in range(2)]
+        # self.ant_list = [Ant(self.world, 'Ants', Vector2(0, 0)), Ant(self.world, 'Ants', Vector2(5, 5))]
         self.world.layers['Home'] = [[15, 15], [14, 14], [15, 14], [14, 15]]
-        self.pheromone_a = Essence(self.world, 'Pheromone_A', 0, 1)
-        self.pheromone_b = Essence(self.world, 'Pheromone_B', 0, 3)
+        self.pheromone_a = Essence(self.world, 'Pheromone_A', decay_rate=1)
+        self.pheromone_b = Essence(self.world, 'Pheromone_B', decay_rate=3)
+        # Do not add any variables after calling the loop. it will cause object has no attribute error when used.
         self.loop(self.one_loop_step)
 
     # Create one step of the event loop that is to happen. i.e. how the world changes in one step.
@@ -62,20 +65,18 @@ class Visualise(Realise):
         Basically this function is the entire set of changes that are to happen to the world.
         :return:
         """
-
-        for ant in self.ant_list:
+        for i, ant in enumerate(self.ant_list):
             # if np.random.randint(2) == 1:
             # using random and not np.random to use objects and not a np array.
             # ant.direction = random.choice([RIGHT, LEFT, UP, DOWN])
             ant.move()
             if ant.position.y == 0:
-                ant.drop_pheromone('A', 30)
+                ant.drop_pheromone('A', 100)
             else:
-                ant.drop_pheromone('B', 30)
+                ant.drop_pheromone('B', 100)
 
-        self.pheromone_a.decay()
-        self.pheromone_b.decay()
-
+        self.pheromone_a.disperse()
+        self.pheromone_b.disperse()
         return
 
 
