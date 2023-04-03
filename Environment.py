@@ -109,8 +109,8 @@ class Realise:
 
         # This creates a dictionary with keys being layer names and the value containing a class which contains
         # information on how to display and if to display the layer.
-        self.display_layers = {layer: DisplayLayers(layer_data=self.world.layer_data[layer]) for layer in
-                               self.world.layer_data}
+        self.display_layers = {layer: DisplayLayers(layer_data=self.world.layer_data[layer], cell_size=self.cell_size)
+                               for layer in self.world.layer_data}
         # Menu
         self.menu_surf = pygame.Surface((self.menu_width, self.screen_height))
         self.menu_rect = self.menu_surf.get_rect(topright=(self.screen_width, 0))
@@ -243,7 +243,7 @@ class Realise:
 
 
 class DisplayLayers:
-    def __init__(self, layer_data):
+    def __init__(self, layer_data, cell_size):
         # if self.layer_type == 'Block':
         #     self.element = BlockElement(layer_data[1], layer_data[2])
         # elif self.layer_type == 'Float':
@@ -262,6 +262,8 @@ class DisplayLayers:
             self.max_value = layer_data[3]
         if self.sprite_image != 'None':
             self.sprite_image = pygame.image.load(self.sprite_image).convert_alpha()
+            self.sprite_image = pygame.transform.scale(self.sprite_image, (cell_size, cell_size))
+
         self.active = 1
 
     def draw_cell(self, value, surface, location):
