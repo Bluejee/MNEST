@@ -73,20 +73,23 @@ class Agent:
                 self.direction *= -1  # Flip direction.
                 # print('Reflect up')
 
-    def sense_state(self):
-        pass
-
-    def decide_action(self):
-        pass
+    def sense_state(self, sense_type):
+        if sense_type == 'Initial':
+            self.current_observed_state = None  # Change to state
+        elif sense_type == 'Final':
+            self.result_observed_state = None  # Change to state
+        else:
+            print('Something seems wrong with the sense type given.')
 
     def perform_action(self):
+        self.selected_action = self.action_list[self.brain.predict_action(self.current_observed_state)]
         eval('self.child.' + self.selected_action + '()')
 
-    def earn_reward(self):
-        pass
+    def earn_reward(self, reward):
+        self.earned_reward = reward
 
     def learn(self):
-        pass
+        self.brain.learn(self.current_observed_state, self.selected_action, self.earned_reward)
 
 
 class Essence:
@@ -135,9 +138,9 @@ class Brain:
         """
 
         :param state:
-        :return:
+        :return: a number between 0 and number of actions to act as an index
         """
-        action = None
+        action = 0
         return action
 
     def learn(self, state_observed, action_taken, reward_earned):
