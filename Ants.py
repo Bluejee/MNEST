@@ -30,15 +30,49 @@ class Ant(Agent):
             self.world.layers[pheromone_type][int(self.position.y), int(self.position.x)] = 100
             # print(w.layers['Pheromone'][0])
 
+    def move_to_pheromone(self, pheromone_type):
+        # move to the cell around it having the maximum value for the  Pheromone in the forward direction.
+
+        pheromone_type = 'Pheromone_' + pheromone_type  # for simplicity
+        pheromone_layer = self.world.layers[pheromone_type]
+
+        move_directions = []
+        max_pheromone_value = 0
+
+        front_index = self.position + front(self.direction)
+        front_left_index = self.position + front_left(self.direction)
+        front_right_index = self.position + front_left(self.direction)
+
+        for check_direction in [front_left_index, front_index, front_right_index]:
+            if (0 <= check_direction.x < self.world.c_length) and (0 <= check_direction.y < self.world.r_length):
+                # now we know the direction is possible.
+                pheromone_value = pheromone_layer[check_direction.y, check_direction.x]
+                if pheromone_value > max_pheromone_value:
+                    move_directions = [check_direction - self.position]  # we only need one direction if its max
+                elif pheromone_value == max_pheromone_value:
+                    move_directions = [check_direction - self.position, *move_directions]  # appends to the list.
+
+        # now we have checked through all 3 forward directions.
+
+        if len(move_directions) == 0:
+            # it means there is no way forward.
+            # self.direction = reflect(self.direction) This needs to be solved.
+            self.direction = -self.direction
+
+        else:
+            # it means there is one or more of the directions to move towards.
+            self.direction = random.choice(move_directions)
+            self.move()
+
     def move_random(self):
-        self.direction = random.choice([RIGHT, LEFT, UP, DOWN])
+        self.direction = random.choice(DIRECTIONS)
         self.move()
 
     def go_home(self):
-        pass
+        self.move_to_pheromone(pheromone_type='Home')
 
     def go_target(self):
-        pass
+        self.move_to_pheromone(pheromone_type='Target')
 
     def drop_home(self):
         self.drop_pheromone(pheromone_type='Home', quantity=100)
