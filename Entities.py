@@ -1,3 +1,5 @@
+import random
+
 import numpy as np
 from scipy.signal import convolve2d
 
@@ -5,7 +7,7 @@ from Laws import *
 
 
 class Agent:
-    def __init__(self, world, layer_name, child, position=Vector2(0, 0), direction=E,
+    def __init__(self, world, layer_name, child, position: Vector2 = Vector2(0, 0), direction=E,
                  brain_type='Q-Table', action_list=('move', 'stay')):
 
         self.world = world
@@ -19,18 +21,28 @@ class Agent:
         # Fun Fact.
         # As We are storing the position of the element inside the layer. and not a copy of the values.
         # It is stored as a reference and hence we do not have to update the world values everytime.
-        # Frankly for all those who are reading this. I was about to write code to update the values when i accidently
+        # Frankly for all those who are reading this. I was about to write code to update the values when I accidentally
         # ran the simulation to test and saw them updating automatically.
         # I jumped* up and down around the room (* Literally.)
         self.world.layers[self.layer_name] = [position, *self.world.layers[self.layer_name]]
 
         # Variables to make the agent autonomous
-        self.brain = Brain(brain_type)
         self.action_list = action_list
+        self.brain = Brain(brain_type, self.action_list)
+        self.state_hash = ''
         self.current_observed_state = None
         self.selected_action = None
         self.result_observed_state = None
         self.earned_reward = None
+
+    def update(self):
+        """
+        This function updates the state list so that the sense can work correctly.
+        (Can be overwritten by the child.)
+        :return:
+        """
+        print('Hi im here probably you should probably check if you performed the override',
+              'on the update function in the child')
 
     def move(self):
         self.position += self.direction
@@ -74,10 +86,18 @@ class Agent:
                 # print('Reflect up')
 
     def sense_state(self, sense_type):
+        """
+
+        :param sense_type:
+        :return:
+        """
+        # first update the state_list then sense the state.
+        self.update()
+
         if sense_type == 'Initial':
-            self.current_observed_state = None  # Change to state
+            self.current_observed_state = self.state_hash
         elif sense_type == 'Final':
-            self.result_observed_state = None  # Change to state
+            self.result_observed_state = self.state_hash
         else:
             print('Something seems wrong with the sense type given.')
 
@@ -126,24 +146,59 @@ class Essence:
 
 # AI for the Entities.
 class Brain:
-    def __init__(self, brain_type):
-        if brain_type == 'Q-Table':
-            pass
-        elif brain_type == 'Deep-Q':
+    def __init__(self, brain_type: str, action_list: list):
+        self.brain_type = brain_type
+        self.action_list = action_list
+
+        if self.brain_type == 'Q-Table':
+            self.q_table = {}
+        elif self.brain_type == 'Deep-Q':
             pass
         else:
             print('There seems to be some mistake on the brain type.')
 
-    def predict_action(self, state):
+    def add_state(self, state: str):
         """
+        This function is applicable to the Q-Table type Brain.
+        (If a state being asked for doesn't exist) It populates the Q-Table with a new key value pair.
+        :param state: The state for which the new state is to be added.
+        :return:
+        """
+        self.q_table[state] = np.zeros(len(self.action_list))
 
-        :param state:
-        :return: a number between 0 and number of actions to act as an index
+    def predict_action(self, state: str):
         """
-        action = 0
+        This function takes in a state and predicts an action based on the brain.
+        :param state: The state for which the action is to be predicted
+        :return: a number between 0 and number of actions to act as an index.
+        """
+        if self.brain_type == 'Q-Table':
+            if state in self.q_table:
+                q_values = self.q_table[state]  # q_values for that state
+                predict_list = np.where(q_values == max(q_values))[0]  # list of all indices with max q_values
+                action = np.random.choice(predict_list)
+                # print('State_found')
+            else:
+                self.add_state(state)
+                # Define a dictionary with string keys
+
+                # Sort the dictionary by its keys alphabetically
+                self.q_table = dict(sorted(self.q_table.items()))
+
+                # action = np.random.randint(len(self.action_list))
+                action = 0
+                # print('New_state')
+        elif self.brain_type == 'Deep-Q':
+            action = 0
+            pass
+
+        else:
+            action = None
+            print('There seems to be some mistake on the brain type.')
+        # print(len(self.q_table), self.q_table.keys())
         return action
 
-    def learn(self, state_observed, action_taken, reward_earned):
+    def learn(self, state_observed: str, action_taken: int, reward_earned: float):
         """
 
         :param state_observed:
@@ -151,4 +206,10 @@ class Brain:
         :param reward_earned:
         :return:
         """
+        if self.brain_type == 'Q-Table':
+            pass
+        elif self.brain_type == 'Deep-Q':
+            pass
+        else:
+            print('There seems to be some mistake on the brain type.')
         pass
