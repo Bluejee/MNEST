@@ -1,5 +1,3 @@
-import random
-
 import numpy as np
 from scipy.signal import convolve2d
 
@@ -96,8 +94,10 @@ class Agent:
 
         if sense_type == 'Initial':
             self.current_observed_state = self.state_hash
+            # print('initial', self.current_observed_state, self.result_observed_state)
         elif sense_type == 'Final':
             self.result_observed_state = self.state_hash
+            # print('final', self.current_observed_state, self.result_observed_state)
         else:
             print('Something seems wrong with the sense type given.')
 
@@ -109,7 +109,10 @@ class Agent:
         self.earned_reward = reward
 
     def learn(self):
-        self.brain.learn(self.current_observed_state, self.selected_action, self.earned_reward)
+        self.brain.learn(state_observed=self.current_observed_state,
+                         action_taken=self.action_list.index(self.selected_action),
+                         next_state=self.result_observed_state,
+                         reward_earned=self.earned_reward)
 
 
 class Essence:
@@ -146,9 +149,18 @@ class Essence:
 
 # AI for the Entities.
 class Brain:
-    def __init__(self, brain_type: str, action_list: list):
+    def __init__(self, brain_type: str, action_list: list, learning_rate=0.2,
+                 exploration_rate=0.1, discounted_return=0.5, exploration_decay=0.01, min_exploration=0):
+
         self.brain_type = brain_type
         self.action_list = action_list
+
+        # Learning Parameters
+        self.learning_rate = learning_rate  # Alpha
+        self.exploration_rate = exploration_rate  # Epsilon
+        self.exploration_decay = exploration_decay  # Epsilon Decay
+        self.min_exploration = min_exploration
+        self.discounted_return = discounted_return  # Gamma or Lambda
 
         if self.brain_type == 'Q-Table':
             self.q_table = {}
@@ -166,6 +178,9 @@ class Brain:
         """
         self.q_table[state] = np.zeros(len(self.action_list))
 
+        # Sort the dictionary by its keys alphabetically
+        self.q_table = dict(sorted(self.q_table.items()))
+
     def predict_action(self, state: str):
         """
         This function takes in a state and predicts an action based on the brain.
@@ -180,13 +195,8 @@ class Brain:
                 # print('State_found')
             else:
                 self.add_state(state)
-                # Define a dictionary with string keys
-
-                # Sort the dictionary by its keys alphabetically
-                self.q_table = dict(sorted(self.q_table.items()))
-
-                # action = np.random.randint(len(self.action_list))
-                action = 0
+                action = np.random.randint(len(self.action_list))
+                # action = 0
                 # print('New_state')
         elif self.brain_type == 'Deep-Q':
             action = 0
@@ -196,20 +206,33 @@ class Brain:
             action = None
             print('There seems to be some mistake on the brain type.')
         # print(len(self.q_table), self.q_table.keys())
+        # print(action)
         return action
 
-    def learn(self, state_observed: str, action_taken: int, reward_earned: float):
+    def learn(self, state_observed: str, action_taken: int, next_state: str, reward_earned: float):
         """
 
+        :param next_state:
         :param state_observed:
         :param action_taken:
         :param reward_earned:
         :return:
         """
         if self.brain_type == 'Q-Table':
-            pass
+            # There is a possibility that the new state does not exist in the q table.
+            if next_state not in self.q_table:
+                self.add_state(next_state)
+
+            values_state_observed = self.q_table[state_observed]
+            values_next_state = self.q_table[next_state]
+
+            learned_value = reward_earned + self.discounted_return * (max(values_next_state))
+            new_value = ((1 - self.learning_rate) * values_state_observed[action_taken] +
+                         self.learning_rate * learned_value)
+            values_next_state[action_taken] = new_value
+
         elif self.brain_type == 'Deep-Q':
             pass
         else:
             print('There seems to be some mistake on the brain type.')
-        pass
+            pass
