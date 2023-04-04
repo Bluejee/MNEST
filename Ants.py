@@ -59,10 +59,11 @@ class Ant(Agent):
         pheromone_type = 'Pheromone_' + pheromone_type  # for simplicity
         self.world.layers[pheromone_type][int(self.position.y), int(self.position.x)] += quantity
 
-        # capping pheromone at a cell to 100
-        loc = self.world.layers[pheromone_type][int(self.position.y), int(self.position.x)]
-        if loc > 100:
-            self.world.layers[pheromone_type][int(self.position.y), int(self.position.x)] = 100
+        # capping pheromone at a cell to max value
+        max_pheromone = self.world.layer_data[pheromone_type][3]
+        pheromone_value = self.world.layers[pheromone_type][int(self.position.y), int(self.position.x)]
+        if pheromone_value > max_pheromone:
+            self.world.layers[pheromone_type][int(self.position.y), int(self.position.x)] = max_pheromone
             # print(w.layers['Pheromone'][0])
 
     def move_to_pheromone(self, pheromone_type):
@@ -110,10 +111,10 @@ class Ant(Agent):
         self.move_to_pheromone(pheromone_type='Target')
 
     def drop_home(self):
-        self.drop_pheromone(pheromone_type='Home', quantity=20)
+        self.drop_pheromone(pheromone_type='Home', quantity=0.2)
 
     def drop_target(self):
-        self.drop_pheromone(pheromone_type='Target', quantity=20)
+        self.drop_pheromone(pheromone_type='Target', quantity=0.2)
 
 
 # Setting up the Visualiser.
@@ -126,8 +127,8 @@ class Visualise(Realise):
         # The simulation will however work fine. just that the option for selecting layers will be disabled
 
         # Create the necessary layers.
-        layers = {'Pheromone_Home': ['Float', (200, 90, 170), 'None', 100],
-                  'Pheromone_Target': ['Float', (200, 170, 90), 'None', 100],
+        layers = {'Pheromone_Home': ['Float', (200, 90, 170), 'None', 1],
+                  'Pheromone_Target': ['Float', (200, 170, 90), 'None', 1],
                   'Home': ['Block', (214, 103, 191), 'None'],
                   'Target': ['Block', (214, 191, 103), 'None'],
                   'Ants': ['Block', (255, 0, 0), 'Stock_Images/ant_sq.png']}
@@ -144,8 +145,8 @@ class Visualise(Realise):
                              layer_name='Ants',
                              position=Vector2(random.choice(self.world.layers['Home']))) for _ in range(10)]
 
-        self.pheromone_a = Essence(self.world, 'Pheromone_Home', decay_rate=0.05)
-        self.pheromone_b = Essence(self.world, 'Pheromone_Target', decay_rate=0.05)
+        self.pheromone_a = Essence(self.world, 'Pheromone_Home', decay_rate=0.01)
+        self.pheromone_b = Essence(self.world, 'Pheromone_Target', decay_rate=0.01)
 
         # Graphing Variables
         self.max_states_explored = {}
