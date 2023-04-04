@@ -1,7 +1,6 @@
-from Environment import World, Clock, Realise
+from Environment import World, Realise
 from Entities import Agent, Essence
 from Laws import *
-import numpy as np
 import random
 
 """
@@ -18,7 +17,7 @@ class Ant(Agent):
     # Initialise the parent class. Make sure to initialise it with the child as self.
     def __init__(self, world, layer_name, position=Vector2(0, 0)):
         super().__init__(world=world, layer_name=layer_name, child=self, position=position,
-                         action_list=['move_random, go_home, go_target, drop_home, drop_target'])
+                         action_list=['move_random', 'go_home', 'go_target', 'drop_home', 'drop_target'])
 
     def drop_pheromone(self, pheromone_type, quantity):
         pheromone_type = 'Pheromone_' + pheromone_type  # for simplicity
@@ -38,7 +37,7 @@ class Ant(Agent):
 
         move_directions = []
         max_pheromone_value = 0
-
+        # print(self.direction, DIRECTIONS)
         front_index = self.position + front(self.direction)
         front_left_index = self.position + front_left(self.direction)
         front_right_index = self.position + front_left(self.direction)
@@ -46,7 +45,7 @@ class Ant(Agent):
         for check_direction in [front_left_index, front_index, front_right_index]:
             if (0 <= check_direction.x < self.world.c_length) and (0 <= check_direction.y < self.world.r_length):
                 # now we know the direction is possible.
-                pheromone_value = pheromone_layer[check_direction.y, check_direction.x]
+                pheromone_value = pheromone_layer[int(check_direction.y), int(check_direction.x)]
                 if pheromone_value > max_pheromone_value:
                     move_directions = [check_direction - self.position]  # we only need one direction if its max
                 elif pheromone_value == max_pheromone_value:
@@ -61,11 +60,11 @@ class Ant(Agent):
 
         else:
             # it means there is one or more of the directions to move towards.
-            self.direction = random.choice(move_directions)
+            self.direction = random.choice(move_directions).copy()
             self.move()
 
     def move_random(self):
-        self.direction = random.choice(DIRECTIONS)
+        self.direction = random.choice(DIRECTIONS).copy()
         self.move()
 
     def go_home(self):
@@ -124,12 +123,13 @@ class Visualise(Realise):
             # using random and not np.random to use objects and not a np array.
             # ant.direction = random.choice([RIGHT, LEFT, UP, DOWN])
             if self.clock.time_step < 1000:
-                if ant.position.y % 2 == 0:
-                    ant.selected_action = 'drop_target'
-                else:
-                    ant.selected_action = 'drop_home'
-                ant.perform_action()
-                ant.selected_action = 'move_random'
+                # if ant.position.y % 2 == 0:
+                #     ant.selected_action = 'drop_target'
+                # else:
+                #     ant.selected_action = 'drop_home'
+                # ant.perform_action()
+                ant.selected_action = random.choice(ant.action_list)
+                # print(ant.selected_action)
                 ant.perform_action()
         self.pheromone_a.disperse()
         self.pheromone_b.disperse()
