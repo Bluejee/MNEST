@@ -4,7 +4,7 @@ from Laws import *
 import numpy as np
 import random
 
-"""
+""" 
 This is the main code file. The following is a sample template that can be modified inorder to create any type 
 of simulations. This version uses inheritance to work through everything avoiding duplication and other issues.
 
@@ -31,10 +31,10 @@ class Visualise(Realise):
         super().__init__(world=World(layer_data=layers, r_length=30, c_length=30))
 
         # Adjust set parameters
-        self.frame_rate_cap = 60
+        self.frame_rate_cap = 20
 
         # Set up the new variables and performing initial setups.
-        self.agent_list = [Agent(self.world, 'Agent', Vector2(i % 30, i % 30)) for i in range(50)]
+        self.agent_list = [Agent(self.world, 'Agent', Vector2(i % 30, i % 30)) for i in range(5)]
         self.world.layers['Home'] = [[15, 15], [14, 14], [15, 14]]
         self.pheromone = Essence(self.world, 'Pheromone', 0, 3)
         self.loop(self.one_loop_step)
