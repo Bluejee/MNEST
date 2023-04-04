@@ -193,6 +193,11 @@ class Brain:
             if np.random.random() < self.exploration_rate:
                 # Explore
                 action = np.random.randint(len(self.action_list))
+
+                # We have to store the state anyway
+                if state not in self.q_table:
+                    self.add_state(state)
+
             else:
                 # Exploit
                 if state in self.q_table:
