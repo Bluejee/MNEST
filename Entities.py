@@ -5,11 +5,13 @@ from Laws import *
 
 
 class Agent:
-    def __init__(self, world, layer_name, position=Vector2(0, 0), direction=RIGHT,
-                 brain_type='Q-Table', action_list=('Right', 'Left', 'Up', 'Down')):
+    def __init__(self, world, layer_name, child, position=Vector2(0, 0), direction=RIGHT,
+                 brain_type='Q-Table', action_list=('move', 'stay')):
 
         self.world = world
         self.layer_name = layer_name
+        self.child = child
+
         self.position = position
         self.direction = np.copy(direction)
         # as Right is a list, it is inherited as a pointer and hence we have to make a copy to avoid problems.
@@ -74,8 +76,11 @@ class Agent:
     def sense_state(self):
         pass
 
-    def perform_action(self):
+    def decide_action(self):
         pass
+
+    def perform_action(self):
+        eval('self.child.' + self.selected_action + '()')
 
     def earn_reward(self):
         pass
