@@ -90,8 +90,8 @@ class Visualise(Realise):
         # The simulation will however work fine. just that the option for selecting layers will be disabled
 
         # Create the necessary layers.
-        layers = {'Pheromone_Home': ['Float', (209, 126, 17), 'None', 100],
-                  'Pheromone_Target': ['Float', (126, 209, 17), 'None', 100],
+        layers = {'Pheromone_Home': ['Float', (200, 90, 170), 'None', 100],
+                  'Pheromone_Target': ['Float', (200, 170, 90), 'None', 100],
                   'Home': ['Block', (214, 103, 191), 'None'],
                   'Target': ['Block', (214, 191, 103), 'None'],
                   'Ants': ['Block', (255, 0, 0), 'Stock_Images/ant_sq.png']}
@@ -99,7 +99,7 @@ class Visualise(Realise):
         # Initialise the parent class. Make sure to initialise it with the child as self.
         # Adjust set parameters
         super().__init__(world=World(layer_data=layers, r_length=30, c_length=30), child=self, frame_rate_cap=60,
-                         cell_size=25, sim_background=(255, 255, 255))
+                         cell_size=35, sim_background=(255, 255, 255))
         # Set up the new variables and performing initial setups.
         self.ant_list = [Ant(self.world, 'Ants', Vector2(i % 30, i % 30)) for i in range(5)]
         # self.ant_list = [Ant(self.world, 'Ants', Vector2(0, 0)), Ant(self.world, 'Ants', Vector2(5, 5))]
@@ -118,19 +118,18 @@ class Visualise(Realise):
         Basically this function is the entire set of changes that are to happen to the world.
         :return:
         """
+        # Iterating over all ants.
         for i, ant in enumerate(self.ant_list):
-            # if np.random.randint(2) == 1:
-            # using random and not np.random to use objects and not a np array.
-            # ant.direction = random.choice([RIGHT, LEFT, UP, DOWN])
+            # use random and not np.random to use objects and not a np array.
             if self.clock.time_step < 1000:
-                # if ant.position.y % 2 == 0:
-                #     ant.selected_action = 'drop_target'
-                # else:
-                #     ant.selected_action = 'drop_home'
-                # ant.perform_action()
-                ant.selected_action = random.choice(ant.action_list)
-                # print(ant.selected_action)
+                ant.sense_state('Initial')
                 ant.perform_action()
+                ant.sense_state('Final')
+                reward = 0
+                ant.earn_reward(reward)
+                ant.learn()
+                # ant.selected_action = random.choice(ant.action_list)
+
         self.pheromone_a.disperse()
         self.pheromone_b.disperse()
         return
