@@ -150,7 +150,7 @@ class Essence:
 # AI for the Entities.
 class Brain:
     def __init__(self, brain_type: str, action_list: list, learning_rate=0.2,
-                 exploration_rate=0.1, discounted_return=0.5, exploration_decay=0.01, min_exploration=0):
+                 exploration_rate=0.1, discounted_return=0.5, exploration_decay=0.0001, min_exploration=0):
 
         self.brain_type = brain_type
         self.action_list = action_list
@@ -188,16 +188,28 @@ class Brain:
         :return: a number between 0 and number of actions to act as an index.
         """
         if self.brain_type == 'Q-Table':
-            if state in self.q_table:
-                q_values = self.q_table[state]  # q_values for that state
-                predict_list = np.where(q_values == max(q_values))[0]  # list of all indices with max q_values
-                action = np.random.choice(predict_list)
-                # print('State_found')
-            else:
-                self.add_state(state)
+
+            # Checking Exploration vs Exploitation.
+            if np.random.random() < self.exploration_rate:
+                # Explore
                 action = np.random.randint(len(self.action_list))
-                # action = 0
-                # print('New_state')
+            else:
+                # Exploit
+                if state in self.q_table:
+                    q_values = self.q_table[state]  # q_values for that state
+                    predict_list = np.where(q_values == max(q_values))[0]  # list of all indices with max q_values
+                    action = np.random.choice(predict_list)
+                    # print('State_found')
+                else:
+                    self.add_state(state)
+                    action = np.random.randint(len(self.action_list))
+                    # action = 0
+                    # print('New_state')
+
+            # Decaying exploration_rate
+            if self.exploration_rate > self.min_exploration:
+                self.exploration_rate -= self.exploration_decay
+
         elif self.brain_type == 'Deep-Q':
             action = 0
             pass
