@@ -142,7 +142,7 @@ class Visualise(Realise):
 
         self.ant_list = [Ant(world=self.world,
                              layer_name='Ants',
-                             position=Vector2(random.choice(self.world.layers['Home']))) for i in range(5)]
+                             position=Vector2(random.choice(self.world.layers['Home']))) for _ in range(10)]
 
         self.pheromone_a = Essence(self.world, 'Pheromone_Home', decay_rate=0.05)
         self.pheromone_b = Essence(self.world, 'Pheromone_Target', decay_rate=0.05)
@@ -197,7 +197,7 @@ class Visualise(Realise):
 
 # Instantiating the realisation/ Gods Perspective
 realise = Visualise()
-# plt.plot(realise.max_food.keys(), realise.max_food.values(), label='Food')
+plt.plot(realise.max_food.keys(), realise.max_food.values(), label='Food')
 plt.plot(realise.max_states_explored.keys(), np.array(list(realise.max_states_explored.values())) / 121, label='State')
 plt.legend()
 plt.show()
