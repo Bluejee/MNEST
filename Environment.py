@@ -72,10 +72,12 @@ class Realise:
     This is the class used to visualise the environment/simulation.
     """
 
-    def __init__(self, world: World, frame_rate_cap=60, cell_size=20, border_size=2, clock_color=(56, 74, 12),
+    def __init__(self, world: World, child, frame_rate_cap=60, cell_size=20, border_size=2, clock_color=(56, 74, 12),
                  sim_background=(89, 187, 247), menu_background=(0, 255, 0), border_color=(255, 0, 0)):
 
         pygame.init()
+        # Child variable.
+        self.child = child
 
         # Simulation Variables
         self.world = world
@@ -210,7 +212,9 @@ class Realise:
         else:
             self.state = "Play"
 
-    def loop(self, loop_step):
+    # def loop(self, loop_step):
+    def loop(self):
+
         # Running the draw and update functions once to show initial state.
         # Running the draw loop to create all the necessary layouts and surfaces
         self.draw()
@@ -235,7 +239,7 @@ class Realise:
 
                 # Running one step of the loop as provided in the definition.
                 # This is defined by the creator according to the needs of the simulation.
-                loop_step()
+                self.child.loop_step()
 
                 # updating the clock as one step is completed.
                 self.clock.next_step()
