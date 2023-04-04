@@ -5,7 +5,9 @@ from Laws import *
 
 
 class Agent:
-    def __init__(self, world, layer_name, position=Vector2(0, 0), direction=RIGHT):
+    def __init__(self, world, layer_name, position=Vector2(0, 0), direction=RIGHT,
+                 brain_type='Q-Table', action_list=('Right', 'Left', 'Up', 'Down')):
+
         self.world = world
         self.layer_name = layer_name
         self.position = position
@@ -19,6 +21,14 @@ class Agent:
         # ran the simulation to test and saw them updating automatically.
         # I jumped* up and down around the room (* Literally.)
         self.world.layers[self.layer_name] = [position, *self.world.layers[self.layer_name]]
+
+        # Variables to make the agent autonomous
+        self.brain = Brain(brain_type)
+        self.action_list = action_list
+        self.current_observed_state = None
+        self.selected_action = None
+        self.result_observed_state = None
+        self.earned_reward = None
 
     def move(self):
         self.position += self.direction
@@ -61,6 +71,18 @@ class Agent:
                 self.direction *= -1  # Flip direction.
                 # print('Reflect up')
 
+    def sense_state(self):
+        pass
+
+    def perform_action(self):
+        pass
+
+    def earn_reward(self):
+        pass
+
+    def learn(self):
+        pass
+
 
 class Essence:
     def __init__(self, world, layer_name,
@@ -92,3 +114,33 @@ class Essence:
         # check if any value went below 0 and if so set it to 0.
         mask = self.world.layers[self.layer_name] < 0
         self.world.layers[self.layer_name][mask] = 0
+
+
+# AI for the Entities.
+class Brain:
+    def __init__(self, brain_type):
+        if brain_type == 'Q-Table':
+            pass
+        elif brain_type == 'Deep-Q':
+            pass
+        else:
+            print('There seems to be some mistake on the brain type.')
+
+    def predict_action(self, state):
+        """
+
+        :param state:
+        :return:
+        """
+        action = None
+        return action
+
+    def learn(self, state_observed, action_taken, reward_earned):
+        """
+
+        :param state_observed:
+        :param action_taken:
+        :param reward_earned:
+        :return:
+        """
+        pass
