@@ -5,7 +5,7 @@ from Laws import *
 
 
 class Agent:
-    def __init__(self, world, layer_name, child, position=Vector2(0, 0), direction=RIGHT,
+    def __init__(self, world, layer_name, child, position=Vector2(0, 0), direction=E,
                  brain_type='Q-Table', action_list=('move', 'stay')):
 
         self.world = world
