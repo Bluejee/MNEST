@@ -13,6 +13,10 @@ Note : Maybe start custom variables with an _ or some identifier to prevent acci
 (Or just keep in mind the parent class and not rename variables)
 """
 
+seed = int(np.genfromtxt('random_seed.txt'))
+random.seed(seed)
+np.random.seed(seed)
+
 
 class Ant(Agent):
 
@@ -51,8 +55,8 @@ class Ant(Agent):
                                self.world.layer_data['Pheromone_Target'][3])
         self.state_hash = (f'{self.has_food}_' +
                            f'{self.steps_since_pheromone_drop}_' +
-                           f'{round(home_likeness, 1):.1f}_' +
-                           f'{round(target_likeness, 1):.1f}')
+                           f'{round(home_likeness, 3):.3f}_' +
+                           f'{round(target_likeness, 3):.3f}')
         # print(self.state_hash)
 
     def drop_pheromone(self, pheromone_type, quantity):
@@ -111,10 +115,10 @@ class Ant(Agent):
         self.move_to_pheromone(pheromone_type='Target')
 
     def drop_home(self):
-        self.drop_pheromone(pheromone_type='Home', quantity=0.2)
+        self.drop_pheromone(pheromone_type='Home', quantity=0.1)
 
     def drop_target(self):
-        self.drop_pheromone(pheromone_type='Target', quantity=0.2)
+        self.drop_pheromone(pheromone_type='Target', quantity=0.1)
 
 
 # Setting up the Visualiser.
@@ -135,18 +139,20 @@ class Visualise(Realise):
 
         # Initialise the parent class. Make sure to initialise it with the child as self.
         # Adjust set parameters
-        super().__init__(world=World(layer_data=layers, r_length=30, c_length=30), child=self, frame_rate_cap=6000,
+        super().__init__(world=World(layer_data=layers, r_length=30, c_length=30), child=self, frame_rate_cap=60,
                          cell_size=25, sim_background=(255, 255, 255))
         # Set up the new variables and performing initial setups.
-        self.world.layers['Home'] = [[15, 15], [14, 14], [15, 14], [14, 15]]
+        self.world.layers['Home'] = [[18, 18], [19, 19], [18, 19], [19, 18]]
         self.world.layers['Target'] = [[10, 10], [9, 9], [10, 9], [9, 10]]
 
         self.ant_list = [Ant(world=self.world,
                              layer_name='Ants',
-                             position=Vector2(random.choice(self.world.layers['Home']))) for _ in range(10)]
-
-        self.pheromone_a = Essence(self.world, 'Pheromone_Home', decay_rate=0.01)
-        self.pheromone_b = Essence(self.world, 'Pheromone_Target', decay_rate=0.01)
+                             position=Vector2(random.choice(self.world.layers['Home']))) for _ in range(30)]
+        dispersion_matrix = np.array([[0.04, 0.04, 0.04],
+                                      [0.04, 0.68, 0.04],
+                                      [0.04, 0.04, 0.04]])
+        self.pheromone_a = Essence(self.world, 'Pheromone_Home', dispersion_matrix=dispersion_matrix, decay_rate=0.05)
+        self.pheromone_b = Essence(self.world, 'Pheromone_Target', dispersion_matrix=dispersion_matrix, decay_rate=0.05)
 
         # Graphing Variables
         self.max_states_explored = {}
@@ -166,7 +172,8 @@ class Visualise(Realise):
         # Iterating over all ants.
         for i, ant in enumerate(self.ant_list):
             # use random and not np.random to use objects and not a np array.
-            if self.clock.time_step < 10000:
+            # if self.clock.time_step < 50000:
+            if True:
                 ant.sense_state('Initial')
                 ant.perform_action()
                 ant.sense_state('Final')
@@ -198,7 +205,15 @@ class Visualise(Realise):
 
 # Instantiating the realisation/ Gods Perspective
 realise = Visualise()
-plt.plot(realise.max_food.keys(), realise.max_food.values(), label='Food')
-plt.plot(realise.max_states_explored.keys(), np.array(list(realise.max_states_explored.values())) / 121, label='State')
-plt.legend()
-plt.show()
+
+# Graphing and Post Simulation Analysis
+# plt.figure(1)
+# plt.plot(realise.max_food.keys(), realise.max_food.values(), label='Food')
+# plt.legend()
+#
+# plt.figure(2)
+# plt.plot(realise.max_states_explored.keys(),
+#          np.array(list(realise.max_states_explored.values())), label=f'State({1001 * 1001 * 2 * 2})')
+# plt.legend()
+#
+# plt.show()

@@ -1,7 +1,9 @@
 import numpy as np
 from scipy.signal import convolve2d
-
 from Laws import *
+
+seed = int(np.genfromtxt('random_seed.txt'))
+np.random.seed(seed)
 
 
 class Agent:
@@ -141,7 +143,7 @@ class Essence:
     def decay(self):
         # This is usually not something that we need to use in simulations unless we have periodic boundaries or so.
         # Usually, things disperse and then go out of the edge of the world.
-        self.world.layers[self.layer_name] -= self.decay_rate
+        self.world.layers[self.layer_name] -= self.world.layers[self.layer_name] * self.decay_rate
         # check if any value went below 0 and if so set it to 0.
         mask = self.world.layers[self.layer_name] < 0
         self.world.layers[self.layer_name][mask] = 0
@@ -150,7 +152,7 @@ class Essence:
 # AI for the Entities.
 class Brain:
     def __init__(self, brain_type: str, action_list: list, learning_rate=0.2,
-                 exploration_rate=0.1, discounted_return=0.5, exploration_decay=0.0001, min_exploration=0):
+                 exploration_rate=0.5, discounted_return=0.5, exploration_decay=0.0001, min_exploration=0):
 
         self.brain_type = brain_type
         self.action_list = action_list

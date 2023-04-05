@@ -6,6 +6,9 @@ This file contains the classes that create the environment.
 This would contain the Clock, The World, and the God's Perspective(Realise).
 """
 
+seed = int(np.genfromtxt('random_seed.txt'))
+np.random.seed(seed)
+
 
 class Clock:
     """
