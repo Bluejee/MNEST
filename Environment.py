@@ -75,7 +75,8 @@ class Realise:
     This is the class used to visualise the environment/simulation.
     """
 
-    def __init__(self, world: World, child, frame_rate_cap=60, cell_size=20, border_size=2, clock_color=(56, 74, 12),
+    def __init__(self, world: World, child, frame_rate_cap=60, cell_size=20, border_size=2,
+                 clock_color=(56, 74, 12), sim_text_color=(119, 21, 167),
                  sim_background=(89, 187, 247), menu_background=(0, 255, 0), border_color=(255, 0, 0)):
 
         pygame.init()
@@ -103,8 +104,6 @@ class Realise:
         self.screen_height = self.sim_height + 2 * self.border_size
         self.screen_width = self.sim_width + self.menu_width + 2 * self.border_size
 
-        self.clock_color = clock_color
-
         self.menu_background = menu_background
         self.sim_background = sim_background
 
@@ -126,9 +125,22 @@ class Realise:
         self.sim_surf = pygame.Surface((self.sim_width, self.sim_height))
         self.sim_rect = self.sim_surf.get_rect(topleft=(self.border_size, self.border_size))
         self.sim_surf.fill(self.sim_background)
+        self.show_sim = False
+
+        # Text Fonts
+        self.all_font = pygame.font.Font(None, 25)
+        self.clock_font = pygame.font.Font(None, 25)
+        self.sim_font = pygame.font.Font(None, 40)
 
         # Clock/Step text
-        self.clock_font = pygame.font.Font(None, 25)
+        self.clock_color = clock_color
+
+        # Visualisation State Text
+        self.sim_text_color = sim_text_color
+
+        # At the end of Initialisation, we have to draw the sim_pause to show the pause screen at the start.
+        if not self.show_sim:
+            self.draw_sim_pause()
 
     def draw_menu(self):
         """
@@ -203,10 +215,37 @@ class Realise:
                 # Now that all cells have been drawn, we blit the layer_surf on to the screen
                 self.screen.blit(layer_surf, self.sim_rect)
 
+            # Adding the hide visualisation text if the sim is visible on to the menu.
+            prompt_text = 'Press the <v> Key to hide Visualisation.'
+
+            prompt_surf = self.all_font.render(prompt_text, True, self.sim_text_color)
+            prompt_rect = prompt_surf.get_rect(midtop=(self.sim_rect.centerx, self.sim_rect.top + 2 * self.border_size))
+
+            self.screen.blit(prompt_surf, prompt_rect)
+
+    def draw_sim_pause(self):
+        # Draw simulation Background
+        self.screen.blit(self.sim_surf, self.sim_rect)
+
+        # Pause Prompt.
+        pause_prompt_text = 'Press the <v> Key to Show Visualisation.'
+        pause_prompt_surf = self.sim_font.render(pause_prompt_text, True, self.sim_text_color)
+        pause_prompt_rect = pause_prompt_surf.get_rect(midbottom=(self.sim_rect.centerx, self.sim_rect.centery))
+
+        self.screen.blit(pause_prompt_surf, pause_prompt_rect)
+
+        # Pause Info.
+        pause_info_text = '(The simulation runs faster without visualisation)'
+        pause_info_surf = self.all_font.render(pause_info_text, True, self.sim_text_color)
+        pause_info_rect = pause_info_surf.get_rect(midtop=pause_prompt_rect.midbottom)
+
+        self.screen.blit(pause_info_surf, pause_info_rect)
+
     def draw(self):
         # This function draws the menu and the simulation surfaces.
         self.draw_menu()
-        self.draw_sim()
+        if self.show_sim:
+            self.draw_sim()
         return
 
     def switch_state(self):
@@ -221,7 +260,7 @@ class Realise:
         # Running the draw and update functions once to show initial state.
         # Running the draw loop to create all the necessary layouts and surfaces
         self.draw()
-        # updating the changes to the screen and limiting to 60 fps
+        # updating the changes to the screen
         pygame.display.update()
 
         while True:
@@ -233,7 +272,18 @@ class Realise:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
                         self.switch_state()
-
+                    if event.key == pygame.K_v:
+                        self.show_sim = not self.show_sim
+                        # check and display visualisation paused msg.
+                        if not self.show_sim:
+                            self.draw_sim_pause()
+                            # updating the changes to the screen
+                            pygame.display.update()
+                        else:
+                            # This is necessary only cause the simulation starts with a paused sim visualisation.
+                            self.draw()
+                            # updating the changes to the screen
+                            pygame.display.update()
             if self.state == "Play":
                 # Running the draw loop to create all the necessary layouts and surfaces
                 self.draw()
