@@ -37,6 +37,23 @@ class Ant(Agent):
         self.state_hash = ''  # it is a hash that represents the state the ant exists in.
         self.brain.min_exploration = 0.05
 
+        ################################################################################################################
+        # to populate the entire state space. This will speed up the simulation.
+        full_state_table = {}
+        for _ant_food in [True, False]:
+            for _time_drop in [0, 1, 2, 3, 4]:
+                for _like_home in [0, 1, 2, 3, 4]:
+                    for _like_target in [0, 1, 2, 3, 4]:
+                        state = (f'{_ant_food}_' +
+                                 f'{_time_drop}_' +
+                                 f'{_like_home}_' +
+                                 f'{_like_target}')
+                        print(state)
+                        full_state_table[state] = np.zeros(len(self.action_list))
+
+        self.brain.q_table = dict(sorted(full_state_table.items()))
+        ################################################################################################################
+
     def update(self):
         """
         This updates the state_hash of the ant.
