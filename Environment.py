@@ -283,6 +283,8 @@ class Realise:
                     # Pause and Play Simulation.
                     if event.key == pygame.K_SPACE:
                         self.switch_state()
+                        self.draw()
+                        pygame.display.update()
 
                     # Show and Hide visualisation.
                     if event.key == pygame.K_v:
