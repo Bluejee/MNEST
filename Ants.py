@@ -29,10 +29,11 @@ class Ant(Agent):
         self.steps_since_pheromone_drop = 0
         self.home_likeness = 1  # How much the current cell is like Home according to the home pheromone
         self.target_likeness = 0  # How much the current cell is like Target according to the target pheromone
-        # state_list = 'If the ant has food'+
-        #               'time since dropping the last pheromone.'+
-        #               'how much is the cell like home'+
-        #               'how much is the cell like target'
+        # state_list = 'If the ant has food'+                        (True/False)
+        #               'time since dropping the last pheromone.'+   (0,1,2,3,4)
+        #               'how much is the cell like home'+            (0,1,2,3,4)
+        #               'how much is the cell like target'           (0,1,2,3,4)
+        self.max_states = (2 * 5 * 5 * 5)
         self.state_hash = ''  # it is a hash that represents the state the ant exists in.
         self.brain.min_exploration = 0.05
 
@@ -136,10 +137,10 @@ class Ant(Agent):
         self.move_to_pheromone(pheromone_type='Target')
 
     def drop_home(self):
-        self.drop_pheromone(pheromone_type='Home', quantity=0.05)
+        self.drop_pheromone(pheromone_type='Home', quantity=0.1)
 
     def drop_target(self):
-        self.drop_pheromone(pheromone_type='Target', quantity=0.05)
+        self.drop_pheromone(pheromone_type='Target', quantity=0.1)
 
 
 # Setting up the Visualiser.
@@ -191,14 +192,18 @@ class Visualise(Realise):
         :return:
         """
         # Iterating over all ants.
-        for i, ant in enumerate(self.ant_list):
+        for index, ant in enumerate(self.ant_list):
+
             # use random and not np.random to use objects and not a np array.
             # if self.clock.time_step < 50000:
             if True:
                 ant.sense_state('Initial')
                 ant.perform_action()
                 ant.sense_state('Final')
-
+                if ant.selected_action in ['drop_home', 'drop_target']:
+                    ant.steps_since_pheromone_drop = 0
+                else:
+                    ant.steps_since_pheromone_drop = (ant.steps_since_pheromone_drop + 1) % 5
                 # Check food:
                 if (ant.position in self.world.layers['Target']) and not ant.has_food:
                     ant.has_food = True
@@ -232,7 +237,7 @@ realise = Visualise()
 # Graphing and Post Simulation Analysis
 plt.figure(1)
 plt.plot(realise.max_states_explored.keys(),
-         np.array(list(realise.max_states_explored.values())), label=f'State({1001 * 1001 * 2 * 2})')
+         np.array(list(realise.max_states_explored.values())), label=f'State({realise.ant_list[0].max_states})')
 plt.legend()
 plt.figure(2)
 food = np.array(list(realise.food_collected.values()))
