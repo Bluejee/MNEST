@@ -271,7 +271,7 @@ class DisplayLayers:
         if self.sprite_image != 'None':
             self.sprite_image = pygame.image.load(self.sprite_image).convert_alpha()
             self.sprite_image = pygame.transform.scale(self.sprite_image, (cell_size, cell_size))
-
+        self.t_factor = 1  # Transparency factor for the sprites.
         self.active = 1
 
     def draw_cell(self, value, surface, location):
@@ -302,7 +302,7 @@ class DisplayLayers:
             if self.sprite_image == 'None':
                 # If there is no sprite image to be shown.
                 # Draw the Float
-                transparency = int(0.8 * (value / self.max_value) * 255)
+                transparency = int(self.t_factor * (value / self.max_value) * 255)
                 # transparency = np.random.randint(256) For testing.
                 pygame.draw.rect(surface, (*self.color, transparency), location)
             else:
@@ -310,7 +310,7 @@ class DisplayLayers:
                 # Setting transparency value
                 # 0.8 used as if we have full opacity the information about the layer below is lost.
                 # This way it will blend.
-                transparency = int(0.8 * (value / self.max_value) * 255)
+                transparency = int(self.t_factor * (value / self.max_value) * 255)
                 # transparency = np.random.randint(256) For testing.
                 self.sprite_image.set_alpha(transparency)
                 sprite_rect = pygame.Rect(location)
