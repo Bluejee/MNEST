@@ -34,6 +34,7 @@ class Ant(Agent):
         #               'how much is the cell like home'+
         #               'how much is the cell like target'
         self.state_hash = ''  # it is a hash that represents the state the ant exists in.
+        self.brain.min_exploration = 0.05
 
     def update(self):
         """
@@ -53,10 +54,15 @@ class Ant(Agent):
         else:
             target_likeness = (self.world.layers['Pheromone_Target'][int(self.position.y), int(self.position.x)] /
                                self.world.layer_data['Pheromone_Target'][3])
+        # self.state_hash = (f'{self.has_food}_' +
+        #                    f'{self.steps_since_pheromone_drop}_' +
+        #                    f'{round(home_likeness, 1):.1f}_' +
+        #                    f'{round(target_likeness, 1):.1f}')
+
         self.state_hash = (f'{self.has_food}_' +
                            f'{self.steps_since_pheromone_drop}_' +
-                           f'{round(home_likeness, 3):.3f}_' +
-                           f'{round(target_likeness, 3):.3f}')
+                           f'{round(home_likeness * 4)}_' +
+                           f'{round(target_likeness * 4)}')
         # print(self.state_hash)
 
     def drop_pheromone(self, pheromone_type, quantity):
@@ -130,10 +136,10 @@ class Ant(Agent):
         self.move_to_pheromone(pheromone_type='Target')
 
     def drop_home(self):
-        self.drop_pheromone(pheromone_type='Home', quantity=0.1)
+        self.drop_pheromone(pheromone_type='Home', quantity=0.05)
 
     def drop_target(self):
-        self.drop_pheromone(pheromone_type='Target', quantity=0.1)
+        self.drop_pheromone(pheromone_type='Target', quantity=0.05)
 
 
 # Setting up the Visualiser.
@@ -146,15 +152,15 @@ class Visualise(Realise):
         # The simulation will however work fine. just that the option for selecting layers will be disabled
 
         # Create the necessary layers.
-        layers = {'Pheromone_Home': ['Float', (200, 90, 170), 'None', 1],
-                  'Pheromone_Target': ['Float', (200, 170, 90), 'None', 1],
-                  'Home': ['Block', (214, 103, 191), 'None'],
-                  'Target': ['Block', (214, 191, 103), 'None'],
-                  'Ants': ['Block', (255, 0, 0), 'Stock_Images/ant_sq.png']}
+        layers = {'Pheromone_Target': ['Float', (250, 10, 50), 'None', 1],
+                  'Pheromone_Home': ['Float', (85, 121, 207), 'None', 1],
+                  'Ants': ['Block', (255, 0, 0), 'Stock_Images/ant_sq.png'],
+                  'Home': ['Block', (50, 98, 209), 'None'],
+                  'Target': ['Block', (204, 4, 37), 'None']}
 
         # Initialise the parent class. Make sure to initialise it with the child as self.
         # Adjust set parameters
-        super().__init__(world=World(layer_data=layers, r_length=30, c_length=30), child=self, frame_rate_cap=60,
+        super().__init__(world=World(layer_data=layers, r_length=30, c_length=30), child=self, frame_rate_cap=600,
                          cell_size=25, sim_background=(255, 255, 255))
         # Set up the new variables and performing initial setups.
         self.world.layers['Home'] = [[18, 18], [19, 19], [18, 19], [19, 18]]
@@ -162,16 +168,16 @@ class Visualise(Realise):
 
         self.ant_list = [Ant(world=self.world,
                              layer_name='Ants',
-                             position=Vector2(random.choice(self.world.layers['Home']))) for _ in range(30)]
+                             position=Vector2(random.choice(self.world.layers['Home']))) for _ in range(20)]
         dispersion_matrix = np.array([[0.04, 0.04, 0.04],
                                       [0.04, 0.68, 0.04],
                                       [0.04, 0.04, 0.04]])
-        self.pheromone_a = Essence(self.world, 'Pheromone_Home', dispersion_matrix=dispersion_matrix, decay_rate=0.05)
-        self.pheromone_b = Essence(self.world, 'Pheromone_Target', dispersion_matrix=dispersion_matrix, decay_rate=0.05)
+        self.pheromone_a = Essence(self.world, 'Pheromone_Home', dispersion_matrix=dispersion_matrix, decay_rate=0.1)
+        self.pheromone_b = Essence(self.world, 'Pheromone_Target', dispersion_matrix=dispersion_matrix, decay_rate=0.1)
 
         # Graphing Variables
         self.max_states_explored = {}
-        self.max_food = {}
+        self.food_collected = {}
 
         # Do not add any variables after calling the loop. it will cause object has no attribute error when used.
         # self.loop(self.one_loop_step)
@@ -196,12 +202,14 @@ class Visualise(Realise):
                 # Check food:
                 if (ant.position in self.world.layers['Target']) and not ant.has_food:
                     ant.has_food = True
+                    print('Empty ant in target')
 
                 # Calculate Reward and food count.
                 if (ant.position in self.world.layers['Home']) and ant.has_food:
-                    reward = 10
+                    reward = 100
                     ant.has_food = False
                     ant.food_count += 1
+                    print('food ant home')
                 else:
                     reward = -1
 
@@ -210,7 +218,7 @@ class Visualise(Realise):
                 # ant.selected_action = random.choice(ant.action_list)
                 # print(max([len(ant.brain.q_table) for ant in self.ant_list]))
                 self.max_states_explored[self.clock.time_step] = max([len(ant.brain.q_table) for ant in self.ant_list])
-                self.max_food[self.clock.time_step] = max([ant.food_count for ant in self.ant_list])
+                self.food_collected[self.clock.time_step] = [ant.food_count for ant in self.ant_list]
         self.pheromone_a.disperse()
         self.pheromone_b.disperse()
         # self.pheromone_a.decay()
@@ -223,12 +231,26 @@ realise = Visualise()
 
 # Graphing and Post Simulation Analysis
 plt.figure(1)
-plt.plot(realise.max_food.keys(), realise.max_food.values(), label='Food')
-plt.legend()
-
-plt.figure(2)
 plt.plot(realise.max_states_explored.keys(),
          np.array(list(realise.max_states_explored.values())), label=f'State({1001 * 1001 * 2 * 2})')
 plt.legend()
+plt.figure(2)
+food = np.array(list(realise.food_collected.values()))
+
+for i in range(food.shape[1]):
+    plt.plot(realise.food_collected.keys(), food[:, i])  # , 'r.'  , label='Food_{i}')
+plt.legend()
+
+plt.figure(3)
+total_food = np.sum(food, axis=1)
+
+plt.plot(realise.food_collected.keys(), total_food)
+
+plt.figure(4)
+food_per_step = np.zeros_like(total_food)
+for i in range(1, food_per_step.size):
+    food_per_step[i] = total_food[i] - total_food[i - 1]
+
+plt.plot(realise.food_collected.keys(), food_per_step)
 
 plt.show()
