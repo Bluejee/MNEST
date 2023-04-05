@@ -144,6 +144,7 @@ class Realise:
 
     def draw_menu(self):
         """
+        Documentation to be corrected.
         This function draws the menu surface of the visualisation. it does the following.
         1. It shows the simulation clock and allows the user to play and pause the simulation.
         2. It allows the user to select which all layers are to be displayed.
@@ -172,6 +173,15 @@ class Realise:
         prompt_rect = prompt_surf.get_rect(
             midbottom=(self.menu_rect.centerx, step_rect.top - 2 * self.border_size))
         self.screen.blit(prompt_surf, prompt_rect)
+
+        # Analyse Prompt.
+
+        analyse_prompt_text = 'Press <a> to run Analysis.'
+
+        analyse_prompt_surf = self.clock_font.render(analyse_prompt_text, True, self.clock_color)
+        analyse_prompt_rect = analyse_prompt_surf.get_rect(
+            midbottom=(self.menu_rect.centerx, prompt_rect.top - 2 * self.border_size))
+        self.screen.blit(analyse_prompt_surf, analyse_prompt_rect)
 
     def draw_sim(self):
         # This function draws the layers of the world on to the screen
@@ -270,8 +280,11 @@ class Realise:
                     pygame.quit()
                     return
                 if event.type == pygame.KEYDOWN:
+                    # Pause and Play Simulation.
                     if event.key == pygame.K_SPACE:
                         self.switch_state()
+
+                    # Show and Hide visualisation.
                     if event.key == pygame.K_v:
                         self.show_sim = not self.show_sim
                         # check and display visualisation paused msg.
@@ -284,6 +297,10 @@ class Realise:
                             self.draw()
                             # updating the changes to the screen
                             pygame.display.update()
+
+                    if event.key == pygame.K_a:
+                        self.analyse()
+
             if self.state == "Play":
                 # Running the draw loop to create all the necessary layouts and surfaces
                 self.draw()
@@ -298,6 +315,15 @@ class Realise:
                 self.clock.next_step()
 
             self.pyclock.tick(self.frame_rate_cap)
+
+    def analyse(self):
+        """
+        This function runs all the analysis for the realisation.
+        (Can be overwritten by the child.)
+        :return:
+        """
+        print('Hi im here probably you should probably check if you performed the override',
+              'on the update function in the child')
 
 
 class DisplayLayers:

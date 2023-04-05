@@ -48,7 +48,7 @@ class Ant(Agent):
                                  f'{_time_drop}_' +
                                  f'{_like_home}_' +
                                  f'{_like_target}')
-                        print(state)
+                        # print(state)
                         full_state_table[state] = np.zeros(len(self.action_list))
 
         self.brain.q_table = dict(sorted(full_state_table.items()))
@@ -224,14 +224,14 @@ class Visualise(Realise):
                 # Check food:
                 if (ant.position in self.world.layers['Target']) and not ant.has_food:
                     ant.has_food = True
-                    print('Empty ant in target')
+                    # print('Empty ant in target')
 
                 # Calculate Reward and food count.
                 if (ant.position in self.world.layers['Home']) and ant.has_food:
                     reward = 100
                     ant.has_food = False
                     ant.food_count += 1
-                    print('food ant home')
+                    # print('food ant home')
                 else:
                     reward = -1
 
@@ -247,32 +247,33 @@ class Visualise(Realise):
         # self.pheromone_b.decay()
         return
 
+    def analyse(self):
+        # Graphing and Post Simulation Analysis
+        plt.figure(1)
+        plt.plot(self.max_states_explored.keys(),
+                 np.array(list(self.max_states_explored.values())), label=f'State({self.ant_list[0].max_states})')
+        plt.legend()
+        plt.figure(2)
+        food = np.array(list(self.food_collected.values()))
+
+        for i in range(food.shape[1]):
+            plt.plot(self.food_collected.keys(), food[:, i])  # , 'r.'  , label='Food_{i}')
+        plt.legend()
+
+        plt.figure(3)
+        total_food = np.sum(food, axis=1)
+
+        plt.plot(self.food_collected.keys(), total_food)
+
+        plt.figure(4)
+        food_per_step = np.zeros_like(total_food)
+        for i in range(1, food_per_step.size):
+            food_per_step[i] = total_food[i] - total_food[i - 1]
+
+        plt.plot(self.food_collected.keys(), food_per_step)
+
+        plt.show()
+
 
 # Instantiating the realisation/ Gods Perspective
 realise = Visualise()
-
-# Graphing and Post Simulation Analysis
-plt.figure(1)
-plt.plot(realise.max_states_explored.keys(),
-         np.array(list(realise.max_states_explored.values())), label=f'State({realise.ant_list[0].max_states})')
-plt.legend()
-plt.figure(2)
-food = np.array(list(realise.food_collected.values()))
-
-for i in range(food.shape[1]):
-    plt.plot(realise.food_collected.keys(), food[:, i])  # , 'r.'  , label='Food_{i}')
-plt.legend()
-
-plt.figure(3)
-total_food = np.sum(food, axis=1)
-
-plt.plot(realise.food_collected.keys(), total_food)
-
-plt.figure(4)
-food_per_step = np.zeros_like(total_food)
-for i in range(1, food_per_step.size):
-    food_per_step[i] = total_food[i] - total_food[i - 1]
-
-plt.plot(realise.food_collected.keys(), food_per_step)
-
-plt.show()
