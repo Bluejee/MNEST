@@ -302,13 +302,15 @@ class DisplayLayers:
             if self.sprite_image == 'None':
                 # If there is no sprite image to be shown.
                 # Draw the Float
-                transparency = int((value / self.max_value) * 255)
+                transparency = int(0.8 * (value / self.max_value) * 255)
                 # transparency = np.random.randint(256) For testing.
                 pygame.draw.rect(surface, (*self.color, transparency), location)
             else:
                 # Show the sprite at the cell
                 # Setting transparency value
-                transparency = int((value / self.max_value) * 255)
+                # 0.8 used as if we have full opacity the information about the layer below is lost.
+                # This way it will blend.
+                transparency = int(0.8 * (value / self.max_value) * 255)
                 # transparency = np.random.randint(256) For testing.
                 self.sprite_image.set_alpha(transparency)
                 sprite_rect = pygame.Rect(location)
