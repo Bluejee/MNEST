@@ -72,7 +72,7 @@ class Ant(Agent):
 
     def move_to_pheromone(self, pheromone_type):
         # move to the cell around it having the maximum value for the  Pheromone in the forward direction.
-
+        aim = pheromone_type
         pheromone_type = 'Pheromone_' + pheromone_type  # for simplicity
         pheromone_layer = self.world.layers[pheromone_type]
 
@@ -86,9 +86,24 @@ class Ant(Agent):
         for check_direction in [front_left_index, front_index, front_right_index]:
             if (0 <= check_direction.x < self.world.c_length) and (0 <= check_direction.y < self.world.r_length):
                 # now we know the direction is possible.
+
+                # Directly select direction if it is home or target.
+                if check_direction in self.world.layers[aim]:
+                    if max_pheromone_value < 2:
+                        # This is the first aim cell we find.
+                        # Discard all other directions.
+                        move_directions = [check_direction - self.position]
+                        max_pheromone_value = 2
+                    else:
+                        # Append new aim cells to the list.
+                        move_directions = [check_direction - self.position, *move_directions]  # .
+
+                # The following won't work once an aim cell is found.
                 pheromone_value = pheromone_layer[int(check_direction.y), int(check_direction.x)]
                 if pheromone_value > max_pheromone_value:
                     move_directions = [check_direction - self.position]  # we only need one direction if its max
+                    max_pheromone_value = pheromone_value
+
                 elif pheromone_value == max_pheromone_value:
                     move_directions = [check_direction - self.position, *move_directions]  # appends to the list.
 
@@ -207,13 +222,13 @@ class Visualise(Realise):
 realise = Visualise()
 
 # Graphing and Post Simulation Analysis
-# plt.figure(1)
-# plt.plot(realise.max_food.keys(), realise.max_food.values(), label='Food')
-# plt.legend()
-#
-# plt.figure(2)
-# plt.plot(realise.max_states_explored.keys(),
-#          np.array(list(realise.max_states_explored.values())), label=f'State({1001 * 1001 * 2 * 2})')
-# plt.legend()
-#
-# plt.show()
+plt.figure(1)
+plt.plot(realise.max_food.keys(), realise.max_food.values(), label='Food')
+plt.legend()
+
+plt.figure(2)
+plt.plot(realise.max_states_explored.keys(),
+         np.array(list(realise.max_states_explored.values())), label=f'State({1001 * 1001 * 2 * 2})')
+plt.legend()
+
+plt.show()
