@@ -1,5 +1,6 @@
 import numpy as np
 import os
+
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "True"
 import pygame
 
@@ -267,6 +268,23 @@ class Realise:
         else:
             self.state = "Play"
 
+    def no_visualisation(self):
+        """
+        This is equivalent to the loop() but has no visualisation at all.
+        :return:
+        """
+        print('Command Line Version Visualisation turned off.')
+        while True:
+            if self.quit_sim:
+                # exit the loop when requested.
+                return
+            else:
+                # Running one step of the loop as provided in the definition.
+                # This is defined by the creator according to the needs of the simulation.
+                self.child.loop_step()
+                # updating the clock as one step is completed.
+                self.clock.next_step()
+
     # def loop(self, loop_step):
     def loop(self):
 
@@ -340,17 +358,6 @@ class Realise:
 
 class DisplayLayers:
     def __init__(self, layer_data, cell_size):
-        # if self.layer_type == 'Block':
-        #     self.element = BlockElement(layer_data[1], layer_data[2])
-        # elif self.layer_type == 'Float':
-        #     self.element = FloatElement(layer_data[1], layer_data[2], layer_data[3])
-        # else:
-        #     print("ERROR!!!")
-        #     print("This should not have happened.")
-        #     print("It seems like you have misrepresented a layer.")
-        #     print("Check the Definition of the World and check if all layers are either Block or Float.")
-        #     exit()
-
         self.layer_type = layer_data[0]
         self.color = layer_data[1]
         self.sprite_image = layer_data[2]
@@ -383,7 +390,6 @@ class DisplayLayers:
                 else:
                     # Show the sprite at the cell
                     sprite_rect = pygame.Rect(location)
-                    # print(sprite_rect, self.sprite_image)
                     surface.blit(self.sprite_image, sprite_rect)
 
         elif self.layer_type == 'Float':
@@ -391,15 +397,11 @@ class DisplayLayers:
                 # If there is no sprite image to be shown.
                 # Draw the Float
                 transparency = int(self.t_factor * (value / self.max_value) * 255)
-                # transparency = np.random.randint(256) For testing.
                 pygame.draw.rect(surface, (*self.color, transparency), location)
             else:
                 # Show the sprite at the cell
                 # Setting transparency value
-                # 0.8 used as if we have full opacity the information about the layer below is lost.
-                # This way it will blend.
                 transparency = int(self.t_factor * (value / self.max_value) * 255)
-                # transparency = np.random.randint(256) For testing.
                 self.sprite_image.set_alpha(transparency)
                 sprite_rect = pygame.Rect(location)
                 surface.blit(self.sprite_image, sprite_rect)
@@ -410,17 +412,3 @@ class DisplayLayers:
             print("It seems like you have misrepresented a layer.")
             print("Check the Definition of the World and check if all layers are either Block or Float.")
             exit()
-
-# class BlockElement:
-#
-#     def __init__(self, color, sprite_image):
-#         self.color = color
-#         self.sprite_image = sprite_image
-#
-#
-# class FloatElement:
-#
-#     def __init__(self, color, sprite_image, max_value):
-#         self.color = color
-#         self.sprite_image = sprite_image
-#         self.max_value = max_value
