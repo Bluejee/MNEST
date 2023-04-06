@@ -1,0 +1,1 @@
+python3 Ants.py --start_as='Play' --max_steps=1000 --sim_name='Hope_this_works_exam' --min_exploration=0.05 --exploration_rate=0.9 --exploration_decay=0.0001 --learning_rate=0.4 --discounted_return=0.85
