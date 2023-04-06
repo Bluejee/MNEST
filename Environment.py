@@ -1,4 +1,6 @@
 import numpy as np
+import os
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "True"
 import pygame
 
 """
@@ -84,6 +86,7 @@ class Realise:
         self.child = child
 
         # Simulation Variables
+        self.quit_sim = False
         self.world = world
         self.clock = Clock()
         self.state = "Pause"  # The visualisation starts at the paused state.
@@ -275,6 +278,10 @@ class Realise:
 
         while True:
             # Checking events in pygame.
+            if self.quit_sim:
+                pygame.quit()
+                return
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -318,10 +325,13 @@ class Realise:
 
             self.pyclock.tick(self.frame_rate_cap)
 
-    def analyse(self):
+    def analyse(self, **kwargs):
         """
         This function runs all the analysis for the realisation.
         (Can be overwritten by the child.)
+
+        If using <a> to run analysis. Do not use the keyword arguments. I have not found a way to provide it yet.
+        else make sure to provide default values to avoid the error.
         :return:
         """
         print('Hi im here probably you should probably check if you performed the override',
