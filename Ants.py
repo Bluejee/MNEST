@@ -8,7 +8,8 @@ import numpy as np
 import argparse
 
 parser = argparse.ArgumentParser(description='Run The ants simulation.')
-parser.add_argument('--visualise', action='store_true', help='Visualise or Activate Command Line Mode(no visualisation)')
+parser.add_argument('--visualise', action='store_true',
+                    help='Visualise or Activate Command Line Mode(no visualisation)')
 parser.add_argument('--start_as', type=str, default='Pause', help='Weather the simulation starts (Play)ing or (Pause)d')
 parser.add_argument('--sim_name', type=str, default='Default_sim', help='Name of the sim to create files and logs')
 parser.add_argument('--max_steps', type=int, default=10000, help='Maximum number of steps to be taken')
@@ -28,7 +29,7 @@ Note : Maybe start custom variables with an _ or some identifier to prevent acci
 (Or just keep in mind the parent class and not rename variables)
 
 Run like this::
-python Ants.py --visualise=False --start_as='Play' --max_steps=1000 --sim_name='Hope_this_works' --min_exploration=0.05 --exploration_rate=0.9 --exploration_decay=0.0001 --learning_rate=0.4 --discounted_return=0.85
+python Ants.py --visualise --start_as='Play' --max_steps=1000 --sim_name='Hope_this_works' --min_exploration=0.05 --exploration_rate=0.9 --exploration_decay=0.0001 --learning_rate=0.4 --discounted_return=0.85
 """
 seed = int(np.genfromtxt('random_seed.txt'))
 random.seed(seed)
@@ -257,9 +258,9 @@ class Visualise(Realise):
             ant.has_food = False
             ant.reset_position()
         for layer_type in ['Home', 'Target']:
-            for position in self.world.layers[layer_type]:
-                # print(type(self.world.layers['Pheromone_' + layer_type]))
-                self.world.layers['Pheromone_' + layer_type] *= 0
+            # for position in self.world.layers[layer_type]:
+            # print(type(self.world.layers['Pheromone_' + layer_type]))
+            self.world.layers['Pheromone_' + layer_type] *= 0
         return
 
     # Create one step of the event loop that is to happen. i.e. how the world changes in one step.
