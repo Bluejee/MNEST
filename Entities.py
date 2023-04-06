@@ -140,10 +140,14 @@ class Essence:
         self.world.layers[self.layer_name] = convolve2d(self.world.layers[self.layer_name], self.dispersion_matrix,
                                                         mode='same')
 
-    def decay(self):
+    def decay(self, decay_type):
         # This is usually not something that we need to use in simulations unless we have periodic boundaries or so.
         # Usually, things disperse and then go out of the edge of the world.
-        self.world.layers[self.layer_name] -= self.world.layers[self.layer_name] * self.decay_rate
+        if decay_type == 'Percentage':
+            self.world.layers[self.layer_name] -= self.world.layers[self.layer_name] * self.decay_rate
+        elif decay_type == 'Value':
+            self.world.layers[self.layer_name] -= self.decay_rate
+
         # check if any value went below 0 and if so set it to 0.
         mask = self.world.layers[self.layer_name] < 0
         self.world.layers[self.layer_name][mask] = 0
