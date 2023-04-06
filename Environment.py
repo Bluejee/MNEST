@@ -78,11 +78,10 @@ class Realise:
     This is the class used to visualise the environment/simulation.
     """
 
-    def __init__(self, world: World, child, frame_rate_cap=60, cell_size=20, border_size=2,
+    def __init__(self, world: World, child, visualise=True, frame_rate_cap=60, cell_size=20, border_size=2,
                  clock_color=(56, 74, 12), sim_text_color=(119, 21, 167),
                  sim_background=(89, 187, 247), menu_background=(0, 255, 0), border_color=(255, 0, 0)):
 
-        pygame.init()
         # Child variable.
         self.child = child
 
@@ -90,61 +89,66 @@ class Realise:
         self.quit_sim = False
         self.world = world
         self.clock = Clock()
-        self.state = "Pause"  # The visualisation starts at the paused state.
-        self.frame_rate_cap = frame_rate_cap
 
-        # Visualisation Variables
-        self.pyclock = pygame.time.Clock()
-        self.cell_size = cell_size
+        # Everything that deals with Visualisations go under this if statement.
+        self.visualise = visualise
+        if self.visualise:
+            pygame.init()
 
-        self.border_size = border_size  # border goes around the simulation
-        self.border_color = border_color
+            self.state = "Pause"  # The visualisation starts at the paused state.
+            self.frame_rate_cap = frame_rate_cap
+            # Visualisation Variables
+            self.pyclock = pygame.time.Clock()
+            self.cell_size = cell_size
 
-        self.sim_width = (self.cell_size * self.world.c_length)  # width = no of columns * cell_size
-        self.sim_height = (self.cell_size * self.world.r_length)  # height = no of rows * cell_size
+            self.border_size = border_size  # border goes around the simulation
+            self.border_color = border_color
 
-        self.menu_width = int(self.sim_width / 3)
+            self.sim_width = (self.cell_size * self.world.c_length)  # width = no of columns * cell_size
+            self.sim_height = (self.cell_size * self.world.r_length)  # height = no of rows * cell_size
 
-        self.screen_height = self.sim_height + 2 * self.border_size
-        self.screen_width = self.sim_width + self.menu_width + 2 * self.border_size
+            self.menu_width = int(self.sim_width / 3)
 
-        self.menu_background = menu_background
-        self.sim_background = sim_background
+            self.screen_height = self.sim_height + 2 * self.border_size
+            self.screen_width = self.sim_width + self.menu_width + 2 * self.border_size
 
-        # Surface and Display Variables
-        # Screen
-        self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
-        self.screen.fill(self.border_color)
+            self.menu_background = menu_background
+            self.sim_background = sim_background
 
-        # This creates a dictionary with keys being layer names and the value containing a class which contains
-        # information on how to display and if to display the layer.
-        self.display_layers = {layer: DisplayLayers(layer_data=self.world.layer_data[layer], cell_size=self.cell_size)
-                               for layer in self.world.layer_data}
-        # Menu
-        self.menu_surf = pygame.Surface((self.menu_width, self.screen_height))
-        self.menu_rect = self.menu_surf.get_rect(topright=(self.screen_width, 0))
-        self.menu_surf.fill(self.menu_background)
+            # Surface and Display Variables
+            # Screen
+            self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
+            self.screen.fill(self.border_color)
 
-        # Simulation
-        self.sim_surf = pygame.Surface((self.sim_width, self.sim_height))
-        self.sim_rect = self.sim_surf.get_rect(topleft=(self.border_size, self.border_size))
-        self.sim_surf.fill(self.sim_background)
-        self.show_sim = False
+            # This creates a dictionary with keys being layer names and the value containing a class which contains
+            # information on how to display and if to display the layer.
+            self.display_layers = {layer: DisplayLayers(layer_data=self.world.layer_data[layer], cell_size=self.cell_size)
+                                   for layer in self.world.layer_data}
+            # Menu
+            self.menu_surf = pygame.Surface((self.menu_width, self.screen_height))
+            self.menu_rect = self.menu_surf.get_rect(topright=(self.screen_width, 0))
+            self.menu_surf.fill(self.menu_background)
 
-        # Text Fonts
-        self.all_font = pygame.font.Font(None, 25)
-        self.clock_font = pygame.font.Font(None, 25)
-        self.sim_font = pygame.font.Font(None, 40)
+            # Simulation
+            self.sim_surf = pygame.Surface((self.sim_width, self.sim_height))
+            self.sim_rect = self.sim_surf.get_rect(topleft=(self.border_size, self.border_size))
+            self.sim_surf.fill(self.sim_background)
+            self.show_sim = False
 
-        # Clock/Step text
-        self.clock_color = clock_color
+            # Text Fonts
+            self.all_font = pygame.font.Font(None, 25)
+            self.clock_font = pygame.font.Font(None, 25)
+            self.sim_font = pygame.font.Font(None, 40)
 
-        # Visualisation State Text
-        self.sim_text_color = sim_text_color
+            # Clock/Step text
+            self.clock_color = clock_color
 
-        # At the end of Initialisation, we have to draw the sim_pause to show the pause screen at the start.
-        if not self.show_sim:
-            self.draw_sim_pause()
+            # Visualisation State Text
+            self.sim_text_color = sim_text_color
+
+            # At the end of Initialisation, we have to draw the sim_pause to show the pause screen at the start.
+            if not self.show_sim:
+                self.draw_sim_pause()
 
     def draw_menu(self):
         """
@@ -268,12 +272,22 @@ class Realise:
         else:
             self.state = "Play"
 
+    def run_sim(self):
+        """
+        This Selects the Command line mode or the Visualisation mode.
+        :return:
+        """
+        if self.visualise:
+            self.loop()
+        else:
+            self.no_visualisation()
+
     def no_visualisation(self):
         """
         This is equivalent to the loop() but has no visualisation at all.
         :return:
         """
-        print('Command Line Version Visualisation turned off.')
+        print('Command Line Version: Visualisation turned off.')
         while True:
             if self.quit_sim:
                 # exit the loop when requested.

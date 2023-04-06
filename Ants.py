@@ -8,6 +8,7 @@ import numpy as np
 import argparse
 
 parser = argparse.ArgumentParser(description='Run The ants simulation.')
+parser.add_argument('--visualise', action='store_true', help='Visualise or Activate Command Line Mode(no visualisation)')
 parser.add_argument('--start_as', type=str, default='Pause', help='Weather the simulation starts (Play)ing or (Pause)d')
 parser.add_argument('--sim_name', type=str, default='Default_sim', help='Name of the sim to create files and logs')
 parser.add_argument('--max_steps', type=int, default=10000, help='Maximum number of steps to be taken')
@@ -18,7 +19,7 @@ parser.add_argument('--learning_rate', type=float, default=0.4)
 parser.add_argument('--discounted_return', type=float, default=0.85)
 
 args = parser.parse_args()
-
+print(args.visualise)
 """
 This is the  code file. The following is a sample template that can be modified inorder to create any type 
 of simulations. This version uses inheritance to work through everything avoiding duplication and other issues.
@@ -27,9 +28,8 @@ Note : Maybe start custom variables with an _ or some identifier to prevent acci
 (Or just keep in mind the parent class and not rename variables)
 
 Run like this::
-python Ants.py --start_as='Play' --max_steps=1000 --sim_name='Hope_this_works' --min_exploration=0.05 --exploration_rate=0.9 --exploration_decay=0.0001 --learning_rate=0.4 --discounted_return=0.85
+python Ants.py --visualise=False --start_as='Play' --max_steps=1000 --sim_name='Hope_this_works' --min_exploration=0.05 --exploration_rate=0.9 --exploration_decay=0.0001 --learning_rate=0.4 --discounted_return=0.85
 """
-
 seed = int(np.genfromtxt('random_seed.txt'))
 random.seed(seed)
 np.random.seed(seed)
@@ -218,8 +218,8 @@ class Visualise(Realise):
 
         # Initialise the parent class. Make sure to initialise it with the child as self.
         # Adjust set parameters
-        super().__init__(world=World(layer_data=layers, r_length=30, c_length=30), child=self, frame_rate_cap=600,
-                         cell_size=25, sim_background=(255, 255, 255))
+        super().__init__(world=World(layer_data=layers, r_length=30, c_length=30), child=self, visualise=args.visualise,
+                         frame_rate_cap=600, cell_size=25, sim_background=(255, 255, 255))
         self.state = start_as
         self.max_steps = max_steps
         self.sim_name = args.sim_name
@@ -247,8 +247,7 @@ class Visualise(Realise):
         self.food_collected = {}
 
         # Do not add any variables after calling the loop. it will cause object has no attribute error when used.
-        # self.loop(self.one_loop_step)
-        self.loop()
+        self.run_sim()
 
     def reset(self):
         for ant in self.ant_list:
@@ -344,10 +343,10 @@ class Visualise(Realise):
 
         # # Running Analysis every 10000 frames
         # if self.clock.time_step % 10000 == 0:
-            # self.analyse()
+        # self.analyse()
         if self.clock.time_step >= self.max_steps:
             # do not use <a>. to analyse if using kwargs.
-            self.analyse(file_name=self.sim_name+'.png')
+            self.analyse(file_name=self.sim_name + '.png')
             print(np.random.random())
             self.quit_sim = True
 
