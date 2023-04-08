@@ -341,13 +341,13 @@ class Visualise(Realise):
         self.pheromone_a.disperse()
         self.pheromone_b.disperse()
 
-        # Let the home and the target give off a very small amount of pheromone
-        for layer_type in ['Home', 'Target']:
-            for position in self.world.layers[layer_type]:
-                # print(type(self.world.layers['Pheromone_' + layer_type]))
-                self.world.layers['Pheromone_' + layer_type][position[1], position[0]] += 0.01
-                if self.world.layers['Pheromone_' + layer_type][position[1], position[0]] > 1:
-                    self.world.layers['Pheromone_' + layer_type][position[1], position[0]] -= 0.01
+        # # Let the home and the target give off a very small amount of pheromone
+        # for layer_type in ['Home', 'Target']:
+        #     for position in self.world.layers[layer_type]:
+        #         # print(type(self.world.layers['Pheromone_' + layer_type]))
+        #         self.world.layers['Pheromone_' + layer_type][position[1], position[0]] += 0.01
+        #         if self.world.layers['Pheromone_' + layer_type][position[1], position[0]] > 1:
+        #             self.world.layers['Pheromone_' + layer_type][position[1], position[0]] -= 0.01
 
         if self.clock.time_step % 5000 == 0:
             progress_bar(self.clock.time_step, self.max_steps)
