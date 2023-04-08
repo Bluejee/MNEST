@@ -122,8 +122,9 @@ class Realise:
 
             # This creates a dictionary with keys being layer names and the value containing a class which contains
             # information on how to display and if to display the layer.
-            self.display_layers = {layer: DisplayLayers(layer_data=self.world.layer_data[layer], cell_size=self.cell_size)
-                                   for layer in self.world.layer_data}
+            self.display_layers = {
+                layer: DisplayLayers(layer_data=self.world.layer_data[layer], cell_size=self.cell_size)
+                for layer in self.world.layer_data}
             # Menu
             self.menu_surf = pygame.Surface((self.menu_width, self.screen_height))
             self.menu_rect = self.menu_surf.get_rect(topright=(self.screen_width, 0))
@@ -291,6 +292,7 @@ class Realise:
         while True:
             if self.quit_sim:
                 # exit the loop when requested.
+                print('\rExiting Simulation.')
                 return
             else:
                 # Running one step of the loop as provided in the definition.
@@ -316,6 +318,7 @@ class Realise:
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
+                    print('\nExiting Simulation.')
                     pygame.quit()
                     return
                 if event.type == pygame.KEYDOWN:

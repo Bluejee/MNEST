@@ -8,19 +8,18 @@ import numpy as np
 import argparse
 
 parser = argparse.ArgumentParser(description='Run The ants simulation.')
-parser.add_argument('--visualise', action='store_true',
-                    help='Visualise or Activate Command Line Mode(no visualisation)')
+parser.add_argument('-ns', '--no_show', action='store_true',
+                    help='Activate Command Line Mode(No Visualisation)')
 parser.add_argument('--start_as', type=str, default='Pause', help='Weather the simulation starts (Play)ing or (Pause)d')
 parser.add_argument('--sim_name', type=str, default='Default_sim', help='Name of the sim to create files and logs')
-parser.add_argument('--max_steps', type=int, default=10000, help='Maximum number of steps to be taken')
+parser.add_argument('--max_steps', type=int, default=50000, help='Maximum number of steps to be taken')
 parser.add_argument('--min_exploration', type=float, default=0.05)
 parser.add_argument('--exploration_rate', type=float, default=0.9)
-parser.add_argument('--exploration_decay', type=float, default=0.0001)
+parser.add_argument('--exploration_decay', type=float, default=0.00005)
 parser.add_argument('--learning_rate', type=float, default=0.4)
 parser.add_argument('--discounted_return', type=float, default=0.85)
 
 args = parser.parse_args()
-print(args.visualise)
 """
 This is the  code file. The following is a sample template that can be modified inorder to create any type 
 of simulations. This version uses inheritance to work through everything avoiding duplication and other issues.
@@ -29,11 +28,19 @@ Note : Maybe start custom variables with an _ or some identifier to prevent acci
 (Or just keep in mind the parent class and not rename variables)
 
 Run like this::
-python Ants.py --visualise --start_as='Play' --max_steps=1000 --sim_name='Hope_this_works' --min_exploration=0.05 --exploration_rate=0.9 --exploration_decay=0.0001 --learning_rate=0.4 --discounted_return=0.85
+python Ants.py --no_show --start_as='Play' --max_steps=1000 --sim_name='Hope_this_works' --min_exploration=0.05 --exploration_rate=0.9 --exploration_decay=0.0001 --learning_rate=0.4 --discounted_return=0.85
 """
 seed = int(np.genfromtxt('random_seed.txt'))
 random.seed(seed)
 np.random.seed(seed)
+
+
+def progress_bar(progress, total):
+    percent = 100 * (progress / total)
+    bar = '*' * int(percent) + '-' * (100 - int(percent))
+    print('\r' + '\033[33m' + f'|{bar}| {percent:.2f}%' + '\033[0m', end='\r')
+    if progress == total:
+        print('\r' + '\033[32m' + f'|{bar}| {percent:.2f}%' + '\033[0m')
 
 
 class Ant(Agent):
@@ -219,8 +226,8 @@ class Visualise(Realise):
 
         # Initialise the parent class. Make sure to initialise it with the child as self.
         # Adjust set parameters
-        super().__init__(world=World(layer_data=layers, r_length=30, c_length=30), child=self, visualise=args.visualise,
-                         frame_rate_cap=600, cell_size=25, sim_background=(255, 255, 255))
+        super().__init__(world=World(layer_data=layers, r_length=30, c_length=30), child=self,
+                         visualise=not args.no_show, frame_rate_cap=600, cell_size=25, sim_background=(255, 255, 255))
         self.state = start_as
         self.max_steps = max_steps
         self.sim_name = args.sim_name
@@ -342,58 +349,60 @@ class Visualise(Realise):
                 if self.world.layers['Pheromone_' + layer_type][position[1], position[0]] > 1:
                     self.world.layers['Pheromone_' + layer_type][position[1], position[0]] -= 0.01
 
-        # # Running Analysis every 10000 frames
-        # if self.clock.time_step % 10000 == 0:
-        # self.analyse()
+        if self.clock.time_step % 5000 == 0:
+            progress_bar(self.clock.time_step, self.max_steps)
+
         if self.clock.time_step >= self.max_steps:
             # do not use <a>. to analyse if using kwargs.
             self.analyse(file_name=self.sim_name + '.png')
-            print(np.random.random())
+            print('Verify reproducibility by confirming this exact number.')
+            print(f'Hash for this run :: {np.random.random()}')
             self.quit_sim = True
 
-    def analyse(self, **kwargs):
-        # Graphing and Post Simulation Analysis
-        # plt.figure(1)
-        # plt.plot(self.max_states_explored.keys(),
-        #          np.array(list(self.max_states_explored.values())), label=f'State({self.ant_list[0].max_states})')
-        # plt.legend()
-        # fig_1 = plt.figure(1)
-        food = np.array(list(self.food_collected.values()))
-        #
-        # for i in range(len(self.ant_list)):
-        #     plt.plot(self.food_collected.keys(), food[:, i])  # , 'r.'  , label='Food_{i}')
-        # # plt.legend()
 
-        fig_2 = plt.figure(2)
-        food_per100 = {}
-        sum_1000 = np.zeros_like(food[0])
-        for i, row in enumerate(food):
-            # if not np.array_equal(row, np.array([0, 0, 0])): print(row, sum_1000)
-            sum_1000 += row
-            if i % 1000 == 0:
-                # print(sum_1000)
-                food_per100[i] = sum_1000
-                sum_1000 = np.zeros_like(row)
-        food_per100_values = np.array(list(food_per100.values()))
-        food_per100_values = np.sum(food_per100_values, axis=1)
-        # for i in range(len(self.ant_list)):
-        plt.plot(food_per100.keys(), food_per100_values, '.-')
-        # plt.legend()
-        # plt.figure(3)
-        # total_food = np.sum(food, axis=1)
-        #
-        # plt.plot(self.food_collected.keys(), total_food)
-        #
-        # plt.figure(4)
-        # food_per_step = np.zeros_like(total_food)
-        # for i in range(1, food_per_step.size):
-        #     food_per_step[i] = total_food[i] - total_food[i - 1]
-        #
-        # print(self.food_collected)
-        # plt.plot(self.food_collected.keys(), food_per_step)
-        # plt.show()
-        # fig_1.savefig('Analysis/mil_Food_per_Step.png')
-        fig_2.savefig('Analysis/' + kwargs['file_name'])
+def analyse(self, **kwargs):
+    # Graphing and Post Simulation Analysis
+    # plt.figure(1)
+    # plt.plot(self.max_states_explored.keys(),
+    #          np.array(list(self.max_states_explored.values())), label=f'State({self.ant_list[0].max_states})')
+    # plt.legend()
+    # fig_1 = plt.figure(1)
+    food = np.array(list(self.food_collected.values()))
+    #
+    # for i in range(len(self.ant_list)):
+    #     plt.plot(self.food_collected.keys(), food[:, i])  # , 'r.'  , label='Food_{i}')
+    # # plt.legend()
+
+    fig_2 = plt.figure(2)
+    food_per100 = {}
+    sum_1000 = np.zeros_like(food[0])
+    for i, row in enumerate(food):
+        # if not np.array_equal(row, np.array([0, 0, 0])): print(row, sum_1000)
+        sum_1000 += row
+        if i % 1000 == 0:
+            # print(sum_1000)
+            food_per100[i] = sum_1000
+            sum_1000 = np.zeros_like(row)
+    food_per100_values = np.array(list(food_per100.values()))
+    food_per100_values = np.sum(food_per100_values, axis=1)
+    # for i in range(len(self.ant_list)):
+    plt.plot(food_per100.keys(), food_per100_values, '.-')
+    # plt.legend()
+    # plt.figure(3)
+    # total_food = np.sum(food, axis=1)
+    #
+    # plt.plot(self.food_collected.keys(), total_food)
+    #
+    # plt.figure(4)
+    # food_per_step = np.zeros_like(total_food)
+    # for i in range(1, food_per_step.size):
+    #     food_per_step[i] = total_food[i] - total_food[i - 1]
+    #
+    # print(self.food_collected)
+    # plt.plot(self.food_collected.keys(), food_per_step)
+    # plt.show()
+    # fig_1.savefig('Analysis/mil_Food_per_Step.png')
+    fig_2.savefig('Analysis/' + kwargs['file_name'])
 
 
 # Instantiating the realisation/ Gods Perspective
