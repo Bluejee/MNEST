@@ -359,50 +359,49 @@ class Visualise(Realise):
             print(f'Hash for this run :: {np.random.random()}')
             self.quit_sim = True
 
+    def analyse(self, **kwargs):
+        # Graphing and Post Simulation Analysis
+        # plt.figure(1)
+        # plt.plot(self.max_states_explored.keys(),
+        #          np.array(list(self.max_states_explored.values())), label=f'State({self.ant_list[0].max_states})')
+        # plt.legend()
+        # fig_1 = plt.figure(1)
+        food = np.array(list(self.food_collected.values()))
+        #
+        # for i in range(len(self.ant_list)):
+        #     plt.plot(self.food_collected.keys(), food[:, i])  # , 'r.'  , label='Food_{i}')
+        # # plt.legend()
 
-def analyse(self, **kwargs):
-    # Graphing and Post Simulation Analysis
-    # plt.figure(1)
-    # plt.plot(self.max_states_explored.keys(),
-    #          np.array(list(self.max_states_explored.values())), label=f'State({self.ant_list[0].max_states})')
-    # plt.legend()
-    # fig_1 = plt.figure(1)
-    food = np.array(list(self.food_collected.values()))
-    #
-    # for i in range(len(self.ant_list)):
-    #     plt.plot(self.food_collected.keys(), food[:, i])  # , 'r.'  , label='Food_{i}')
-    # # plt.legend()
-
-    fig_2 = plt.figure(2)
-    food_per100 = {}
-    sum_1000 = np.zeros_like(food[0])
-    for i, row in enumerate(food):
-        # if not np.array_equal(row, np.array([0, 0, 0])): print(row, sum_1000)
-        sum_1000 += row
-        if i % 1000 == 0:
-            # print(sum_1000)
-            food_per100[i] = sum_1000
-            sum_1000 = np.zeros_like(row)
-    food_per100_values = np.array(list(food_per100.values()))
-    food_per100_values = np.sum(food_per100_values, axis=1)
-    # for i in range(len(self.ant_list)):
-    plt.plot(food_per100.keys(), food_per100_values, '.-')
-    # plt.legend()
-    # plt.figure(3)
-    # total_food = np.sum(food, axis=1)
-    #
-    # plt.plot(self.food_collected.keys(), total_food)
-    #
-    # plt.figure(4)
-    # food_per_step = np.zeros_like(total_food)
-    # for i in range(1, food_per_step.size):
-    #     food_per_step[i] = total_food[i] - total_food[i - 1]
-    #
-    # print(self.food_collected)
-    # plt.plot(self.food_collected.keys(), food_per_step)
-    # plt.show()
-    # fig_1.savefig('Analysis/mil_Food_per_Step.png')
-    fig_2.savefig('Analysis/' + kwargs['file_name'])
+        fig_2 = plt.figure(2)
+        food_per100 = {}
+        sum_1000 = np.zeros_like(food[0])
+        for i, row in enumerate(food):
+            # if not np.array_equal(row, np.array([0, 0, 0])): print(row, sum_1000)
+            sum_1000 += row
+            if i % 1000 == 0:
+                # print(sum_1000)
+                food_per100[i] = sum_1000
+                sum_1000 = np.zeros_like(row)
+        food_per100_values = np.array(list(food_per100.values()))
+        food_per100_values = np.sum(food_per100_values, axis=1)
+        # for i in range(len(self.ant_list)):
+        plt.plot(food_per100.keys(), food_per100_values, '.-')
+        # plt.legend()
+        # plt.figure(3)
+        # total_food = np.sum(food, axis=1)
+        #
+        # plt.plot(self.food_collected.keys(), total_food)
+        #
+        # plt.figure(4)
+        # food_per_step = np.zeros_like(total_food)
+        # for i in range(1, food_per_step.size):
+        #     food_per_step[i] = total_food[i] - total_food[i - 1]
+        #
+        # print(self.food_collected)
+        # plt.plot(self.food_collected.keys(), food_per_step)
+        # plt.show()
+        # fig_1.savefig('Analysis/mil_Food_per_Step.png')
+        fig_2.savefig('Analysis/' + kwargs['file_name'])
 
 
 # Instantiating the realisation/ Gods Perspective
