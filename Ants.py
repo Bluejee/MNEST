@@ -4,20 +4,24 @@ from Laws import *
 import random
 import matplotlib.pyplot as plt
 import numpy as np
-
+import time
 import argparse
 
+start_time = time.time()
 parser = argparse.ArgumentParser(description='Run The ants simulation.')
 parser.add_argument('-ns', '--no_show', action='store_true',
                     help='Activate Command Line Mode(No Visualisation)')
-parser.add_argument('--start_as', type=str, default='Pause', help='Weather the simulation starts (Play)ing or (Pause)d')
+parser.add_argument('--start_as', type=str, default='Play', help='Weather the simulation starts (Play)ing or (Pause)d')
 parser.add_argument('--sim_name', type=str, default='Default_sim', help='Name of the sim to create files and logs')
-parser.add_argument('--max_steps', type=int, default=50000, help='Maximum number of steps to be taken')
-parser.add_argument('--min_exploration', type=float, default=0.05)
+parser.add_argument('--max_steps', type=int, default=80000, help='Maximum number of steps to be taken')
+parser.add_argument('--min_exploration', type=float, default=0.01)
 parser.add_argument('--exploration_rate', type=float, default=0.9)
-parser.add_argument('--exploration_decay', type=float, default=0.00005)
-parser.add_argument('--learning_rate', type=float, default=0.4)
-parser.add_argument('--discounted_return', type=float, default=0.85)
+parser.add_argument('--exploration_decay', type=float, default=0.000005)
+parser.add_argument('--learning_rate', type=float, default=0.5)
+parser.add_argument('--discounted_return', type=float, default=0.4)
+parser.add_argument('--drop_amount', type=float, default=0.05)
+parser.add_argument('--dispersion_rate', type=float, default=0.1)
+parser.add_argument('--decay_rate', type=float, default=0.03)
 
 args = parser.parse_args()
 """
@@ -60,9 +64,9 @@ class Ant(Agent):
         self.home_likeness = 1  # How much the current cell is like Home according to the home pheromone
         self.target_likeness = 0  # How much the current cell is like Target according to the target pheromone
         # state_list = 'If the ant has food'+                        (True/False)
-        #               'time since dropping the last pheromone.'+   (0,1,2,3,4)
-        #               'how much is the cell like home'+            (0,1,2,3,4)
-        #               'how much is the cell like target'           (0,1,2,3,4)
+        #               'time since dropping the last pheromone.'+   (0,1,...4)
+        #               'how much is the cell like home'+            (0,1,2,3,4,...9)
+        #               'how much is the cell like target'           (0,1,2,3,4,...9)
         self.max_states = (2 * 5 * 5 * 5)
         self.state_hash = ''  # it is a hash that represents the state the ant exists in.
 
@@ -77,8 +81,8 @@ class Ant(Agent):
         full_state_table = {}
         for _ant_food in [True, False]:
             for _time_drop in [0, 1, 2, 3, 4]:
-                for _like_home in [0, 1, 2, 3, 4]:
-                    for _like_target in [0, 1, 2, 3, 4]:
+                for _like_home in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]:
+                    for _like_target in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]:
                         state = (f'{_ant_food}_' +
                                  f'{_time_drop}_' +
                                  f'{_like_home}_' +
@@ -121,8 +125,9 @@ class Ant(Agent):
 
         self.state_hash = (f'{self.has_food}_' +
                            f'{self.steps_since_pheromone_drop}_' +
-                           f'{round(home_likeness * 4)}_' +
-                           f'{round(target_likeness * 4)}')
+                           f'{round(home_likeness * 10)}_' +
+                           f'{round(target_likeness * 10)}')
+        # print(self.state_hash)
         # print(self.state_hash)
 
     def drop_pheromone(self, pheromone_type, quantity):
@@ -196,21 +201,15 @@ class Ant(Agent):
         self.move_to_pheromone(pheromone_type='Target')
 
     def drop_home(self):
-        self.drop_pheromone(pheromone_type='Home', quantity=0.1)
+        self.drop_pheromone(pheromone_type='Home', quantity=args.drop_amount)
 
     def drop_target(self):
-        self.drop_pheromone(pheromone_type='Target', quantity=0.1)
+        self.drop_pheromone(pheromone_type='Target', quantity=args.drop_amount)
 
 
 # Setting up the Visualiser.
 class Visualise(Realise):
-    def __init__(self, start_as='Pause',
-                 max_steps=10000,
-                 min_exploration=0.05,
-                 exploration_rate=0.9,
-                 exploration_decay=0.0001,
-                 learning_rate=0.4,
-                 discounted_return=0.85):
+    def __init__(self):
         # To Set up the Visualisation, Initialise the class with the World, required variables, and the one_step_loop
         # Initialise the world with necessary size and layers.
         # It is not recommended that the number of layers be more than 10
@@ -228,31 +227,32 @@ class Visualise(Realise):
         # Adjust set parameters
         super().__init__(world=World(layer_data=layers, r_length=30, c_length=30), child=self,
                          visualise=not args.no_show, frame_rate_cap=600, cell_size=25, sim_background=(255, 255, 255))
-        self.state = start_as
-        self.max_steps = max_steps
+        self.state = args.start_as
+        self.max_steps = args.max_steps
         self.sim_name = args.sim_name
         # Set up the new variables and performing initial setups.
-        self.world.layers['Home'] = [[25, 25], [26, 26], [25, 26], [26, 25]]
+        self.world.layers['Home'] = [[15, 15], [16, 16], [15, 16], [16, 15]]
         self.world.layers['Target'] = [[10, 10], [9, 9], [10, 9], [9, 10]]
 
         self.ant_list = [Ant(world=self.world,
                              layer_name='Ants',
-                             position=Vector2(random.choice(self.world.layers['Home'])),
-                             min_exploration=min_exploration,
-                             exploration_rate=exploration_rate,
-                             exploration_decay=exploration_decay,
-                             learning_rate=learning_rate,
-                             discounted_return=discounted_return) for _ in range(30)]
-        dispersion_matrix = np.array([[0.01, 0.01, 0.01],
-                                      [0.01, 0.92, 0.01],
-                                      [0.01, 0.01, 0.01]])
-        self.pheromone_a = Essence(self.world, 'Pheromone_Home', dispersion_matrix=dispersion_matrix, decay_rate=0.001)
+                             position=Vector2(random.choice(self.world.layers['Home']))) for _ in range(30)]
+        dispersion_rate = args.dispersion_rate  # percentage of pheromone to be dispersed.
+        # calculate it like this, maybe. if 0.1 of the pheromone is to be dispersed then,
+
+        dispersion_matrix = np.array([[dispersion_rate / 8, dispersion_rate / 8, dispersion_rate / 8],
+                                      [dispersion_rate / 8, 1 - dispersion_rate, dispersion_rate / 8],
+                                      [dispersion_rate / 8, dispersion_rate / 8, dispersion_rate / 8]])
+        self.pheromone_a = Essence(self.world, 'Pheromone_Home', dispersion_matrix=dispersion_matrix,
+                                   decay_rate=args.decay_rate)
         self.pheromone_b = Essence(self.world, 'Pheromone_Target', dispersion_matrix=dispersion_matrix,
-                                   decay_rate=0.001)
+                                   decay_rate=args.decay_rate)
 
         # Graphing Variables
         self.max_states_explored = {}
         self.food_collected = {}
+        self.action_distribution = {}
+        # {Time_step: ['move_random', 'go_home', 'go_target', 'drop_home', 'drop_target']}
 
         # Do not add any variables after calling the loop. it will cause object has no attribute error when used.
         self.run_sim()
@@ -282,6 +282,7 @@ class Visualise(Realise):
         #     self.reset()
 
         self.food_collected[self.clock.time_step] = np.zeros(len(self.ant_list))
+        self.action_distribution[self.clock.time_step] = np.zeros(len(self.ant_list[0].action_list))
         # Iterating over all ants.
         for index, ant in enumerate(self.ant_list):
 
@@ -292,10 +293,12 @@ class Visualise(Realise):
                 ant.perform_action()
                 ant.sense_state('Final')
 
-                # if ant.selected_action in ['drop_home', 'drop_target']:
-                #     ant.steps_since_pheromone_drop = 0
-                # else:
-                #     ant.steps_since_pheromone_drop = (ant.steps_since_pheromone_drop + 1) % 5
+                self.action_distribution[self.clock.time_step][ant.action_list.index(ant.selected_action)] += 1
+
+                if ant.selected_action in ['drop_home', 'drop_target']:
+                    ant.steps_since_pheromone_drop = 0
+                else:
+                    ant.steps_since_pheromone_drop = (ant.steps_since_pheromone_drop + 1) % 5
 
                 # Check food:
 
@@ -309,16 +312,15 @@ class Visualise(Realise):
                         # new_array[index] = index + 1
                         self.food_collected[self.clock.time_step][index] = 1
                     else:
-                        reward = -1
+                        reward = -5
                         pass
                 elif ant.position in self.world.layers['Target']:
                     if ant.has_food:
-                        # reward = -5
-                        pass
+                        reward = -5
                     else:
                         ant.has_food = True
-                        # reward = 5
-                    reward = -1
+                        reward = 5
+                    # reward = -1
 
                     # print('Empty ant in target')
                 # elif ant.has_food and ant.selected_action == 'drop_target':
@@ -328,7 +330,7 @@ class Visualise(Realise):
                 # elif ant.selected_action in ['drop_home', 'drop_target']:
                 #     reward = -2
                 else:
-                    reward = -1
+                    reward = 0
 
                 ant.earn_reward(reward)
                 ant.learn()
@@ -336,8 +338,8 @@ class Visualise(Realise):
                 # print(max([len(ant.brain.q_table) for ant in self.ant_list]))
                 # self.max_states_explored[self.clock.time_step] = max([len(ant.brain.q_table) for ant in self.ant_list])
                 # self.food_collected[self.clock.time_step] = [ant.food_count for ant in self.ant_list]
-        self.pheromone_a.decay('Value')
-        self.pheromone_b.decay('Value')
+        self.pheromone_a.decay('Percentage')
+        self.pheromone_b.decay('Percentage')
         self.pheromone_a.disperse()
         self.pheromone_b.disperse()
 
@@ -354,61 +356,58 @@ class Visualise(Realise):
 
         if self.clock.time_step >= self.max_steps:
             # do not use <a>. to analyse if using kwargs.
-            self.analyse(file_name=self.sim_name + '.png')
+            self.analyse()
             print('Verify reproducibility by confirming this exact number.')
             print(f'Hash for this run :: {np.random.random()}')
             self.quit_sim = True
 
     def analyse(self, **kwargs):
-        # Graphing and Post Simulation Analysis
-        # plt.figure(1)
-        # plt.plot(self.max_states_explored.keys(),
-        #          np.array(list(self.max_states_explored.values())), label=f'State({self.ant_list[0].max_states})')
-        # plt.legend()
-        # fig_1 = plt.figure(1)
+        trial = np.array(list(self.ant_list[0].brain.q_table.values()))
+        np.savetxt('trial.csv', trial, delimiter=',')
         food = np.array(list(self.food_collected.values()))
-        #
-        # for i in range(len(self.ant_list)):
-        #     plt.plot(self.food_collected.keys(), food[:, i])  # , 'r.'  , label='Food_{i}')
-        # # plt.legend()
+        actions = np.array(list(self.action_distribution.values()), dtype=int)
 
-        fig_2 = plt.figure(2)
-        food_per100 = {}
+        food_per1000 = {}
         sum_1000 = np.zeros_like(food[0])
         for i, row in enumerate(food):
-            # if not np.array_equal(row, np.array([0, 0, 0])): print(row, sum_1000)
             sum_1000 += row
             if i % 1000 == 0:
-                # print(sum_1000)
-                food_per100[i] = sum_1000
+                food_per1000[i] = sum_1000
                 sum_1000 = np.zeros_like(row)
-        food_per100_values = np.array(list(food_per100.values()))
-        food_per100_values = np.sum(food_per100_values, axis=1)
-        # for i in range(len(self.ant_list)):
-        plt.plot(food_per100.keys(), food_per100_values, '.-')
-        # plt.legend()
-        # plt.figure(3)
-        # total_food = np.sum(food, axis=1)
-        #
-        # plt.plot(self.food_collected.keys(), total_food)
-        #
-        # plt.figure(4)
-        # food_per_step = np.zeros_like(total_food)
-        # for i in range(1, food_per_step.size):
-        #     food_per_step[i] = total_food[i] - total_food[i - 1]
-        #
-        # print(self.food_collected)
-        # plt.plot(self.food_collected.keys(), food_per_step)
-        # plt.show()
-        # fig_1.savefig('Analysis/mil_Food_per_Step.png')
-        fig_2.savefig('Analysis/' + kwargs['file_name'])
 
+        actions_per1000 = {}
+        sum_1000 = np.zeros_like(actions[0], dtype=int)
+        for i, row in enumerate(actions):
+            sum_1000 += row
+            if i % 1000 == 0:
+                actions_per1000[i] = sum_1000
+                sum_1000 = np.zeros_like(row, dtype=int)
+
+        fig_1 = plt.figure(1)
+        food_per1000_values = np.array(list(food_per1000.values()))
+        food_per1000_values = np.sum(food_per1000_values, axis=1)
+        plt.plot(food_per1000.keys(), food_per1000_values, '-.')
+        fig_1.savefig('Analysis/' + self.sim_name + '_foodper1000' + '.png')
+
+        fig_2 = plt.figure(2)
+        actions_per1000_values = np.array(list(actions_per1000.values()))
+
+        # Define the names of the actions
+        action_names = self.ant_list[0].action_list
+
+        # Compute the cumulative sums of the action counts for each time step
+        cumulative_counts = np.cumsum(actions_per1000_values, axis=1)
+        # Create a stacked bar plot
+        for i in range(len(action_names) - 1, -1, -1):
+            plt.plot(range(cumulative_counts.shape[0]), cumulative_counts[:, i], '-.')
+        plt.legend(action_names)
+        plt.title('Action_Distribution')
+        plt.xlabel('Time Step')
+        plt.ylabel('Counts')
+        fig_2.savefig('Analysis/' + self.sim_name + '_actionper1000' + '.png')
+        print('Analysis/' + self.sim_name + '_actionper1000' + '.png')
 
 # Instantiating the realisation/ Gods Perspective
-realise = Visualise(start_as=args.start_as,
-                    max_steps=args.max_steps,
-                    min_exploration=args.min_exploration,
-                    exploration_rate=args.exploration_rate,
-                    exploration_decay=args.exploration_decay,
-                    learning_rate=args.learning_rate,
-                    discounted_return=args.discounted_return)
+realise = Visualise()
+end_time = time.time()
+print(f'Time for execution :: {end_time - start_time}s')
