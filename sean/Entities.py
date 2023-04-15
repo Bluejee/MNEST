@@ -2,7 +2,12 @@ import numpy as np
 from scipy.signal import convolve2d
 from Laws import *
 
-seed = int(np.genfromtxt('random_seed.txt'))
+import os
+
+data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data')
+data_file_path = os.path.join(data_dir, 'random_seed.txt')
+
+seed = int(np.genfromtxt(data_file_path))
 np.random.seed(seed)
 
 
