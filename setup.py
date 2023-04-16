@@ -22,7 +22,7 @@ setuptools.setup(
     classifiers=[
         "Programming Language :: Python :: 3",
         "Operating System :: OS Independent",
-        "License :: OSI Approved :: GPL v3 or later",
+        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         'Intended Audience :: Education',
         'Intended Audience :: Developers',
         'Intended Audience :: Science/Research',
