@@ -6,7 +6,7 @@ with open('README.md', 'r') as f:
 setuptools.setup(
     include_package_data=True,
     name='sean',
-    version='0.0.1',
+    version='0.1.0',
     author='Balakrishna Prabhu B N',
     author_email='balakrishnaprabhu1999@gmail.com',
     description='SEAN (A Simulation Environment for Agent-based Neuro-evolution) is a Python package for building and simulating artificial intelligence in multi agent-based models.',

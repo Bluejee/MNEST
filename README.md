@@ -1,9 +1,16 @@
 # SEAN
+SEAN (A Simulation Environment for Agent-based Neuro-evolution) is a Python package for building and simulating
+artificial intelligence in multi agent-based models.
 
-A Simulation Environment for Agent based Neuroevolution
+# Installation.
+''
+pip install sean
+''
+
+# Thank you for your patience
+This project is under development, I will soon be adding proper documentation and other usage details. 
 
 # Scratch Story.
-
 Everything starts with nothingness. The first thing to be created is the world. The world by its name has no meaning, It
 still is nothingness. something arives as the first rule for the world is set. Its shape[Rows x Columns].But what good
 is the shape if it stillhas nothing which is where things start to exist in the world. There are many ways to catagorise
