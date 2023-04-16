@@ -1,4 +1,4 @@
-     SEAN - A Simulation Environment for Agent based NeuroEvolution.
+     MNEST - Multi-agent Neuro Evolution Simulation Toolkit.
     
 Copyright (C) 2023  Balakrishna Prabhu B. N. <balakrishnaprabhu1999@gmail.com>
 
