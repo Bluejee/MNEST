@@ -9,9 +9,7 @@ This file contains the classes that create the environment.
 This would contain the Clock, The World, and the God's Perspective(Realise).
 """
 
-data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data')
-data_file_path = os.path.join(data_dir, 'random_seed.txt')
-
+data_file_path = os.path.join(os.path.dirname(__file__), 'data', 'random_seed.txt')
 seed = int(np.genfromtxt(data_file_path))
 np.random.seed(seed)
 
