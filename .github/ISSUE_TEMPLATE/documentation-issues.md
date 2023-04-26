@@ -1,6 +1,6 @@
 ---
 name: Documentation Issues
-about: If you find mistakes in the documentation on something missing.
+about: If you find mistakes in the documentation or something missing.
 title: ''
 labels: documentation
 assignees: ''
