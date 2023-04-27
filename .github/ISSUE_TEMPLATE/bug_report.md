@@ -7,6 +7,8 @@ assignees: ''
 
 ---
 
+Please view the [Contributing Guidelines](https://github.com/Bluejee/MNEST/blob/main/CONTRIBUTING.md) for information on Contributing.
+
 **Describe the bug**
 A clear and concise description of what the bug is.
 

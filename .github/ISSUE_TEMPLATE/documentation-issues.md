@@ -7,6 +7,8 @@ assignees: ''
 
 ---
 
+Please view the [Contributing Guidelines](https://github.com/Bluejee/MNEST/blob/main/CONTRIBUTING.md) for information on Contributing.
+
 # Type of Issue
 <!-- What is the Issue, is there some mistake in the documentation, or is the documentation you are looking for non existent.-->
 
