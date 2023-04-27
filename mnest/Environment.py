@@ -121,6 +121,9 @@ class Realise:
             self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
             self.screen.fill(self.border_color)
 
+            # Title 
+            self.title = pygame.display.set_caption('MNEST Window')
+
             # This creates a dictionary with keys being layer names and the value containing a class which contains
             # information on how to display and if to display the layer.
             self.display_layers = {
