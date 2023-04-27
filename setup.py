@@ -14,7 +14,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     keywords=['simulation', 'multi-agent', 'neuro-evolution', 'AI', 'ML', 'Biology', 'Physics', 'Computation',
               'Complex Systems'],
-    url='https://github.com/Bluejee/SEAN',
+    url='https://github.com/Bluejee/MNEST',
     packages=['mnest'],
     install_requires=['numpy==1.24.2', 'pygame==2.3.0', 'scipy==1.10.1'],
     python_requires='>=3.7',
