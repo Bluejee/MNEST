@@ -3,8 +3,8 @@ from scipy.signal import convolve2d
 from .Laws import *
 import os
 import random
-import tensorflow as tf
-from .perceptron import *
+# import tensorflow as tf
+# from .perceptron import *
 from .NeuralNetwork import Perceptron
 
 
