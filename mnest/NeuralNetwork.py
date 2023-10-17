@@ -74,6 +74,8 @@ class Perceptron:
     def __init__(self, data, weights = None):
         print("Perceptron Init Ran")
         random.shuffle(data)
+
+        # state would be 1 step at a time
         inputs = np.array([[float(x) for x in row[0:-1]] for row in data])
         self.inputs = np.hstack((inputs, [[1]] * len(inputs))) # Append 1 to each input row, for the bias weight
         self.outputs = np.array([float(row[-1]) for row in data]) # Change no. of o/p to no. of actions 
@@ -92,7 +94,7 @@ class Perceptron:
     def predict(self, x_i):
         # Activation functions is the dot product of input vector and weight vector
         y = np.dot(x_i, self.weights) 
-
+#         Modify it so that gives array output
         if y > 0:
             return y
         else :

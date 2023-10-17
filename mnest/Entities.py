@@ -6,6 +6,7 @@ import random
 # import tensorflow as tf
 # from .perceptron import *
 from .NeuralNetwork import Perceptron
+import TestNeuralNetwork
 
 
 data_file_path = os.path.join(os.path.dirname(__file__), 'data', 'random_seed.txt')
@@ -196,12 +197,13 @@ class Brain:
         if self.brain_type == 'Q-Table':
             self.q_table = {}
         elif self.brain_type == 'Deep-Q':
-            print("Hello There 3")
-            self.q_table = Perceptron()
+            print("Deep-Q Started")
+            self.q_table = TestNeuralNetwork.Perceptron()
             # pass
         else:
             print('There seems to be some mistake on the brain type.')
 
+    # state of add_state becomes the i/p for the perceptron
     def add_state(self, state: str):
         """
         This function is applicable to the Q-Table type Brain.
@@ -235,6 +237,7 @@ class Brain:
                 ''' Changes in PRedict_Action'''
                 # Exploit
                 if state in self.q_table:
+                    # q_value is the array of output. 
                     q_values = self.q_table[state]  # q_values for that state
                     predict_list = np.where(q_values == max(q_values))[0]  # list of all indices with max q_values
                     action = np.random.choice(predict_list)
@@ -266,12 +269,12 @@ class Brain:
 
             else:
                 # Exploit
-                action = Perceptron.predict(state)
+                action = TestNeuralNetwork.Perceptron.predict(state)
 
             if self.exploration_rate > self.min_exploration:
                 self.exploration_rate -= self.exploration_decay
 
-            '''Exploration => Learning part, call predict for prediction. Fit is for learning. So fit will run only once, and predict everytime (or something like that)
+            '''Exploration => Learning part, call predict for prediction. Fit is for learning. So fit will run only once, and predict every time (or something like that)
 
             # Decaying exploration_rate
             if self.exploration_rate > self.min_exploration:
@@ -307,8 +310,7 @@ class Brain:
             values_next_state[action_taken] = new_value
 
         elif self.brain_type == 'Deep-Q':
-            Perceptron.fit()
-
+            TestNeuralNetwork.main()
             # pass
  
         else:
