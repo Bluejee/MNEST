@@ -2,6 +2,11 @@ import numpy as np
 from scipy.signal import convolve2d
 from .Laws import *
 import os
+import random
+# import tensorflow as tf
+# from .perceptron import *
+from .NeuralNetwork import Perceptron
+import TestNeuralNetwork
 
 
 data_file_path = os.path.join(os.path.dirname(__file__), 'data', 'random_seed.txt')
@@ -11,7 +16,7 @@ np.random.seed(seed)
 
 class Agent:
     def __init__(self, world, layer_name, child, position: Vector2 = Vector2(0, 0), direction=E,
-                 brain_type='Q-Table', action_list=('move', 'stay')):
+                 brain_type='Deep-Q', action_list=('move', 'stay')):
 
         self.world = world
         self.layer_name = layer_name
@@ -23,7 +28,7 @@ class Agent:
 
         # Fun Fact.
         # As We are storing the position of the element inside the layer. and not a copy of the values.
-        # It is stored as a reference and hence we do not have to update the world values everytime.
+        # It is stored as a reference and hence we do not have to update the world values every time.
         # Frankly for all those who are reading this. I was about to write code to update the values when I accidentally
         # ran the simulation to test and saw them updating automatically.
         # I jumped* up and down around the room (* Literally.)
@@ -79,7 +84,7 @@ class Agent:
                 self.direction *= -1  # Flip direction.
                 # print('Reflect down')
 
-        # Right
+        # Down
         if self.position.y >= self.world.r_length:
             if self.world.periodic_boundary:
                 self.position = 0
@@ -134,7 +139,7 @@ class Essence:
     def disperse(self):
         """
         Uses matrices and convolutions to disperse the essence
-        In general the rule of thumb is that the dispersion matrix con have values where the total of the values is 1.
+        In general the rule of thumb is that the dispersion matrix can have values where the total of the values is 1.
         Also, the sum of all values that is dispersed(Total - Center_Value) = 1 - Center_Value. of the matrix
         # we need the original layer
         :return:
@@ -155,6 +160,21 @@ class Essence:
         mask = self.world.layers[self.layer_name] < 0
         self.world.layers[self.layer_name][mask] = 0
 
+'''
+# Defining The Q-Network Architecture
+class QNetwork(tf.keras.Model):
+    def __init__(self, state_dim, action_dim):
+        super(QNetwork, self).__init__()
+        self.FirstLayer = tf.keras.layers.Dense(64, activation='relu')
+        self.SecondLayer = tf.keras.layers.Dense(64, activation='relu')
+        self.OutputLayer = tf.keras.layers.Dense(action_dim)
+    
+    def call(self, state):
+        x = self.FirstLayer(state)
+        x = self.SecondLayer(x)
+        output = self.OutputLayer(x)
+        return output
+'''
 
 # AI for the Entities.
 class Brain:
@@ -171,13 +191,19 @@ class Brain:
         self.min_exploration = min_exploration
         self.discounted_return = discounted_return  # Gamma or Lambda
 
+        # Neural Network variables
+        '''self.q_network = QNetwork(sta)'''
+
         if self.brain_type == 'Q-Table':
             self.q_table = {}
         elif self.brain_type == 'Deep-Q':
-            pass
+            print("Deep-Q Started")
+            self.q_table = TestNeuralNetwork.Perceptron()
+            # pass
         else:
             print('There seems to be some mistake on the brain type.')
 
+    # state of add_state becomes the i/p for the perceptron
     def add_state(self, state: str):
         """
         This function is applicable to the Q-Table type Brain.
@@ -208,8 +234,10 @@ class Brain:
                     self.add_state(state)
 
             else:
+                ''' Changes in PRedict_Action'''
                 # Exploit
                 if state in self.q_table:
+                    # q_value is the array of output. 
                     q_values = self.q_table[state]  # q_values for that state
                     predict_list = np.where(q_values == max(q_values))[0]  # list of all indices with max q_values
                     action = np.random.choice(predict_list)
@@ -225,8 +253,32 @@ class Brain:
                 self.exploration_rate -= self.exploration_decay
 
         elif self.brain_type == 'Deep-Q':
-            action = 0
-            pass
+            # action = 0
+            # print("Hello There 1")
+            # pass
+
+            '''# Calling Perceptron.predict()'''
+
+#            training = Perceptron(state)[0]
+#            action = np.argmax(training)
+
+            # Checking Exploration or Exploitation
+            if np.random.random() < self.exploration_rate:
+                # Explore
+                action = np.random.randint(len(self.action_list))
+
+            else:
+                # Exploit
+                action = TestNeuralNetwork.Perceptron.predict(state)
+
+            if self.exploration_rate > self.min_exploration:
+                self.exploration_rate -= self.exploration_decay
+
+            '''Exploration => Learning part, call predict for prediction. Fit is for learning. So fit will run only once, and predict every time (or something like that)
+
+            # Decaying exploration_rate
+            if self.exploration_rate > self.min_exploration:
+                self.exploration_rate -= self.exploration_decay '''
 
         else:
             action = None
@@ -237,7 +289,7 @@ class Brain:
 
     def learn(self, state_observed: str, action_taken: int, next_state: str, reward_earned: float):
         """
-
+        
         :param next_state:
         :param state_observed:
         :param action_taken:
@@ -258,7 +310,9 @@ class Brain:
             values_next_state[action_taken] = new_value
 
         elif self.brain_type == 'Deep-Q':
-            pass
+            TestNeuralNetwork.main()
+            # pass
+ 
         else:
             print('There seems to be some mistake on the brain type.')
             pass
